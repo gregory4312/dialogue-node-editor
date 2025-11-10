@@ -1,0 +1,14 @@
+# IGNORE EVERYTHING
+*
+
+# directories
+!.vscode/
+!.vscode/**
+!packages/
+!packages/**
+
+# files
+!.gitignore
+!package.json
+!pnpm-workspace.yaml
+!pnpm-lock.yaml
