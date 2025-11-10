@@ -1,0 +1,15 @@
+# IGNORE EVERYTHING
+*
+
+# directories
+!src/
+!src/**
+
+# files
+!.gitignore
+
+!LICENSE
+!README.md
+!package.json
+
+!tsconfig.json

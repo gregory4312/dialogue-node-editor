@@ -1,0 +1,16 @@
+{
+  "name": "@workspace/extension",
+  "private": true,
+  "author": "Aevarkan",
+  "license": "GPL-3.0-only",
+  "displayName": "Bedrock Visual Dialogue Editor",
+  "engines": {
+    "vscode": "^1.105.0"
+  },
+  "activationEvents": [],
+  "contributes": {},
+  "categories": [
+    "Other",
+    "Visualization"
+  ]
+}
