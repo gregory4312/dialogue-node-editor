@@ -34,6 +34,31 @@ export const initialNodes = [
     position: { x: 300, y: 300 },
     class: 'light',
   },
+  {
+    id: '6',
+    type: 'scene',
+    data: {
+      sceneId: 'scene1',
+      sceneText: 'Hello world',
+      npcName: 'Alice'
+    },
+    position: { x: 350, y: 300 },
+    class: 'light',
+  },
+  {
+    id: '7',
+    type: 'buttonSlot',
+    data: {
+      parentSceneId: 'scene1',
+      index: 0,
+      button: {
+        displayName: "hi",
+        commands: ["a", "b"]
+      }
+    },
+    position: { x: 350, y: 300 },
+    class: 'light',
+  }
 ]
 
 export const initialEdges = [
