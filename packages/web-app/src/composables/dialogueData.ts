@@ -2,7 +2,7 @@
 // Licensed under the GPLv3 license
 
 import { useEventListener } from "@vueuse/core";
-import { type Button, type DeleteSceneMessage, type GenericSceneMessage, type Scene, type SceneMessage } from "@workspace/common"
+import { SCENE_MAX_BUTTONS, type Button, type DeleteSceneMessage, type GenericSceneMessage, type Scene, type SceneMessage } from "@workspace/common"
 import { useVsCode } from "./vscodeMessages";
 import type { VisualScene } from "@/types";
 import { toVisualScene } from "@/helpers/dataMapper";
@@ -91,6 +91,12 @@ export function useDialogueData() {
         break
       case "updateScene":
         listeners.onSceneUpdate.forEach(fn => fn(messageData.sceneId, toVisualScene(messageData.sceneData)))
+        listeners.onSlotUpdate.forEach(fn => {
+          for (let index = 0; index < SCENE_MAX_BUTTONS; index++) {
+            const slotButton = messageData.sceneData.buttons[index] ?? undefined
+            fn(messageData.sceneId, index, slotButton)
+          }
+        })
         break
       case "deleteScene":
         listeners.onSceneDelete.forEach(fn => fn(messageData.sceneId))
