@@ -53,3 +53,8 @@ export interface Button {
    */
   commands: string[]
 }
+
+/**
+ * Maximum number of buttons per scene.
+ */
+export const SCENE_MAX_BUTTONS = 6
