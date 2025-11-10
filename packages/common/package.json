@@ -3,5 +3,8 @@
   "private": true,
   "devDependencies": {
     "ajv": "^8.17.1"
+  },
+  "scripts": {
+    "test": "vitest"
   }
 }

@@ -6,6 +6,10 @@
 !src/**
 !public/
 !public/**
+!tests/
+!tests/**
+!schemas/
+!schemas/**
 
 # files
 !index.html

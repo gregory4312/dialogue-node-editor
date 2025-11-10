@@ -1,0 +1,34 @@
+{
+	"format_version": "1.14.0",
+	"minecraft:npc_dialogue": {
+		"scenes": [
+			{
+				"scene_tag": "meia_intro",
+				"npc_name": "Meia",
+				"text": "Hello traveller,\n\nI am conducting research on behalf of The Church of Void.\n\nI can only share my findings if you're a member.",
+                "on_open_commands": [
+                    "dialogue open @s @initiator[tag=church_of_thf] meia_book_of_storms"
+                ]
+			},
+			{
+				"scene_tag": "meia_book_of_storms",
+				"npc_name": "Meia",
+				"text": "Greetings member of The Void,\n\nI have just finished my latest creation:\n\n§uThe Book of Storms§r.\n\nWould you like to buy one?\n\nMy price is 64 §l§qCelestine Crystals§r.",
+				"buttons": [
+					{
+						"name": "Buy Book",
+						"commands": [
+						    "tag @initiator[hasitem={item=quartz,data=1,quantity=64..}] add valid_shopping",
+                            "playsound mob.villager.no @initiator[tag=!valid_shopping]",
+                            "playsound mob.villager.yes @initiator[tag=valid_shopping]",
+                            "clear @initiator[tag=valid_shopping] quartz 1 64",
+                            "execute at @initiator[tag=valid_shopping] run structure load story:book_of_storms ~ ~1.7 ~",
+                            "tag @initiator remove valid_shopping",
+                            "dialogue open @s @initiator"
+						]
+					}
+				]
+			}
+		]
+	}
+}
