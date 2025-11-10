@@ -28,3 +28,21 @@ export interface VisualScene extends Omit<Scene, "buttons"> {
    */
   buttons: VisualButton[]
 }
+
+export interface VisualSlot {
+  /**
+   * The identifier of the slot's parent scene.
+   * 
+   * @remarks
+   * Is the `scene_tag` in JSON definition.
+   */
+  parentSceneId: string
+  /**
+   * The slot's index, starting from 0.
+   */
+  index: number
+  /**
+   * The current button in this slot.
+   */
+  button?: Button
+}

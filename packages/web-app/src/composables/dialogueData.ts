@@ -2,8 +2,10 @@
 // Licensed under the GPLv3 license
 
 import { useEventListener } from "@vueuse/core";
-import { type DeleteSceneMessage, type GenericSceneMessage, type Scene, type SceneMessage } from "@workspace/common"
+import { type Button, type DeleteSceneMessage, type GenericSceneMessage, type Scene, type SceneMessage } from "@workspace/common"
 import { useVsCode } from "./vscodeMessages";
+import type { VisualScene } from "@/types";
+import { toVisualScene } from "@/helpers/dataMapper";
 
 // type SceneDelete = (sceneId: string) => void
 // type SceneGeneric = (sceneId: string, scene: Scene) => void
@@ -14,15 +16,16 @@ export function useDialogueData() {
 
   // event listeners
   const listeners = {
-    onSceneCreate: [] as ((sceneId: string, scene: Scene) => void)[],
-    onSceneUpdate: [] as ((sceneId: string, scene: Scene) => void)[],
-    onSceneDelete: [] as ((sceneId: string) => void)[]
+    onSceneCreate: [] as ((sceneId: string, scene: VisualScene) => void)[],
+    onSceneUpdate: [] as ((sceneId: string, scene: VisualScene) => void)[],
+    onSceneDelete: [] as ((sceneId: string) => void)[],
+    onSlotUpdate: [] as ((sceneId: string, index: number, button?: Button) => void)[]
   }
 
   /**
    * Sends a new scene to VSCode.
    */
-  function createScene(scene: Scene) {
+  function createScene(scene: Scene | VisualScene) {
     if (inWebview()) {
       const createSceneMessage: GenericSceneMessage = {
         sceneId: scene.sceneId,
@@ -36,7 +39,7 @@ export function useDialogueData() {
   /**
    * Sends updated scene to VSCode.
    */
-  function updateScene(scene: Scene) {
+  function updateScene(scene: Scene | VisualScene) {
     if (inWebview()) {
       const updateSceneMessage: GenericSceneMessage = {
         sceneId: scene.sceneId,
@@ -60,11 +63,15 @@ export function useDialogueData() {
     }
   }
 
-  function onSceneCreate(callback: (sceneId: string, scene: Scene) => void) {
+  function onSlotUpdate(callback: (parentSceneId: string, index: number, button?: Button) => void) {
+    listeners.onSlotUpdate.push(callback)
+  }
+
+  function onSceneCreate(callback: (sceneId: string, scene: VisualScene) => void) {
     listeners.onSceneCreate.push(callback)
   }
 
-  function onSceneUpdate(callback: (sceneId: string, scene: Scene) => void) {
+  function onSceneUpdate(callback: (sceneId: string, scene: VisualScene) => void) {
     listeners.onSceneUpdate.push(callback)
   }
 
@@ -80,10 +87,10 @@ export function useDialogueData() {
     // check the message type, then send it
     switch (messageData.messageType) {
       case "createScene":
-        listeners.onSceneCreate.forEach(fn => fn(messageData.sceneId, messageData.sceneData))
+        listeners.onSceneCreate.forEach(fn => fn(messageData.sceneId, toVisualScene(messageData.sceneData)))
         break
       case "updateScene":
-        listeners.onSceneUpdate.forEach(fn => fn(messageData.sceneId, messageData.sceneData))
+        listeners.onSceneUpdate.forEach(fn => fn(messageData.sceneId, toVisualScene(messageData.sceneData)))
         break
       case "deleteScene":
         listeners.onSceneDelete.forEach(fn => fn(messageData.sceneId))
@@ -91,5 +98,5 @@ export function useDialogueData() {
     }
   })
 
-  return { onSceneDelete, onSceneCreate, onSceneUpdate, deleteScene, createScene, updateScene }
+  return { onSceneDelete, onSceneCreate, onSceneUpdate, deleteScene, createScene, updateScene, onSlotUpdate }
 }
