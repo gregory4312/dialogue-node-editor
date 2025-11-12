@@ -43,9 +43,6 @@ class DialogueStore {
       newOrder.push(scene.sceneId)
       this.upsertScene(source, scene)
     }
-    // and set this to be the correct order (so the extension doesn't switch around the file structure)
-    this.sceneTagOrder = newOrder
-
     const newIdSet = new Set(newOrder)
     
     // delete any scenes which are not in the new array, as this resets the store
@@ -55,12 +52,21 @@ class DialogueStore {
         this.deleteScene(source, sceneTag)
       }
     }
+
+    // and set this to be the correct order (so the extension doesn't switch around the file structure)
+    // done after everything else in case logic bugs slip through
+    this.sceneTagOrder = newOrder
   }
 
   /**
    * Adds a scene to the store, updating it if it already exists.
    * @param source The source of the information.
    * @param scene The updated scene.
+   * 
+   * @remarks
+   * Emits to `onSceneCreate`, or `onSceneUpdate` respectively.
+   * 
+   * The internal order array does not update if {@link StoreUpdateSource} is the extension.
    */
   public upsertScene(source: StoreUpdateSource, scene: Scene) {
     const sceneTag = scene.sceneId
@@ -76,7 +82,7 @@ class DialogueStore {
     // otherwise it'll be an update
     this.dialogueMap.set(sceneTag, scene)
 
-    // it might be a completely new scene if a bug happened, allow it anyway
+    // it might be a completely new scene
     if (isNew) {
       const createSceneMessage: DialogueStoreGenericMessage = {
         messageSource: source,
@@ -85,6 +91,13 @@ class DialogueStore {
         sceneId: sceneTag
       }
       this.listeners.onSceneCreate.forEach(fn => fn(createSceneMessage))
+
+      // update the internal array if the update is not from the extension
+      if (source != StoreUpdateSource.Extension) {
+        this.sceneTagOrder.push(sceneTag)
+      }
+
+    // or an old one
     } else {
       const updateSceneMessage: DialogueStoreGenericMessage = {
         messageSource: source,
@@ -100,6 +113,9 @@ class DialogueStore {
    * Deletes a scene from the store, emitting to `onSceneDelete` on sucessful deletion.
    * @param source The source of the information.
    * @param sceneTag The tag of the scene to be deleted from the store.
+   * 
+   * @remarks
+   * The internal order array does not update if {@link StoreUpdateSource} is the extension.
    */
   public deleteScene(source: StoreUpdateSource, sceneTag: string) {
     const elementExisted = this.dialogueMap.delete(sceneTag)
@@ -107,6 +123,11 @@ class DialogueStore {
     // don't emit if the scene wasn't even there
     if (!elementExisted) {
       return
+    }
+
+    // update the internal array if the message wasn't sent from the extension
+    if (source != StoreUpdateSource.Extension) {
+      this.sceneTagOrder = this.sceneTagOrder.filter(existingTag => existingTag !== sceneTag)
     }
 
     // send the message to listeners
