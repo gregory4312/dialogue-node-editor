@@ -139,8 +139,30 @@ class DialogueStore {
     this.listeners.onSceneDelete.forEach(fn => fn(deleteMessage))
   }
 
-  public getScenes() {
-    return Array.from(this.dialogueMap.values())
+  /**
+   * Returns the scenes stored according to the order set by `setScenes`.
+   * 
+   * @remarks
+   * Order is sequential otherwise.
+   * 
+   * If internal order and internal map disagree, returns `null, which should never happen.
+   */
+  public getScenes(): Scene[] | null {
+    const orderedScenes: Scene[] = []
+
+    // get scenes according to internal array
+    // this is so the extension won't bounce around the data
+    for (const id of this.sceneTagOrder) {
+      const scene = this.dialogueMap.get(id)
+      // this should never happen
+      // returns null if a scene is in the array but not the map
+      if (!scene) {
+        return null
+      }
+      orderedScenes.push(scene)
+    }
+
+    return orderedScenes
   }
 
 }
