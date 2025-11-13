@@ -6,7 +6,7 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "build": "pnpm -r run build",
-    "dev:webapp": "pnpm --filter @workspace/web-app dev"
+    "dev:webapp": "pnpm --filter @workspace/app dev"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",

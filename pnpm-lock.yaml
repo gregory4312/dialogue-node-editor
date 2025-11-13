@@ -52,7 +52,7 @@ importers:
         specifier: ^0.16.1
         version: 0.16.1(typescript@5.9.3)(vue-tsc@3.1.3(typescript@5.9.3))
 
-  packages/web-app:
+  packages/app:
     dependencies:
       '@vue-flow/background':
         specifier: ^1.3.2
