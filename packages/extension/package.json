@@ -19,7 +19,18 @@
   },
   "main": "./dist/extension.cjs",
   "activationEvents": [],
-  "contributes": {},
+  "contributes": {
+    "configuration": {
+      "title": "Bedrock Dialogue Editor",
+      "properties": {
+        "bedrockDialogueEditor.autoOpen": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically open dialogue files in the visual editor."
+        }
+      }
+    }
+  },
   "categories": [
     "Other",
     "Visualization"
