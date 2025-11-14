@@ -15,5 +15,5 @@
 !package.json
 !.vscodeignore
 
-!tsdown.config.ts
+!tsdown.config.mjs
 !tsconfig.json

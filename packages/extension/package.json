@@ -7,9 +7,10 @@
   "displayName": "Bedrock Visual Dialogue Editor",
   "type": "commonjs",
   "scripts": {
+    "copy-media": "node scripts/copy-app-media-files.cjs",
     "compile": "tsdown",
-    "package": "vsce package -o bedrock-visual-dialogue-editor.vsix",
-    "copy-media": "node scripts/copy-app-media-files.cjs"
+    "build": "pnpm run copy-media && pnpm run compile",
+    "package": "vsce package -o bedrock-visual-dialogue-editor.vsix"
   },
   "repository": {
     "type": "git",

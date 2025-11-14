@@ -6,6 +6,8 @@
 !LICENSE
 !dist/
 !dist/**
+!media/
+!media/**
 
 # ignore src completely
 src/

@@ -5,7 +5,9 @@
   "author": "Aevarkan",
   "license": "GPL-3.0-only",
   "scripts": {
-    "build": "pnpm -r run build",
+    "build": "pnpm -F @workspace/app run build && pnpm -F bedrock-visual-dialogue-editor run build",
+    "build:quick": "pnpm -F @workspace/app run build-only && pnpm -F bedrock-visual-dialogue-editor run build",
+    "package": "pnpm -F bedrock-visual-dialogue-editor run package",
     "dev:webapp": "pnpm --filter @workspace/app dev"
   },
   "devDependencies": {
