@@ -2,8 +2,8 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build Extension",
-      "command": "pnpm build:quick",
+      "label": "Build Extension (Development)",
+      "command": "pnpm build:dev",
       "type": "shell",
       "args": [],
       "problemMatcher": [

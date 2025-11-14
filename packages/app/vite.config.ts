@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     vue(),
     vueDevTools(),
@@ -14,6 +14,7 @@ export default defineConfig({
   // optionally remove this for a browser app
   build: {
     outDir: "dist",
+    sourcemap: mode === 'development' ? 'inline' : false,
     cssCodeSplit: false,
     rollupOptions: {
       output: {
@@ -29,4 +30,4 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-})
+}))

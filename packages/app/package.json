@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
+    "build:dev": "vite build --mode development",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix --cache"
   },
