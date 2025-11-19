@@ -1,21 +1,20 @@
 <script setup lang="ts">
 import { type NodeProps } from '@vue-flow/core'
 import type { Scene } from '@workspace/common';
-import { computed, toRefs } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps<NodeProps<Scene>>()
 
 // sceneId change means deleting the scene
 // no need to track it
-const { sceneText, npcName } = toRefs(props.data)
 
 const sceneTextRef = computed({
-  get: () => sceneText.value,
+  get: () => props.data.sceneText,
   set: (newSceneText: string) => emit('editSceneText', props.data.sceneId, newSceneText)
 })
 
 const npcNameRef = computed({
-  get: () => npcName.value,
+  get: () => props.data.npcName,
   set: (newNpcName: string) => emit('editNpcName', props.data.sceneId, newNpcName)
 })
 
