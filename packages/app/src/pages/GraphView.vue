@@ -1,24 +1,55 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VueFlow, useVueFlow } from '@vue-flow/core'
+import { VueFlow, useVueFlow, type Node, type XYPosition } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { ControlButton, Controls } from '@vue-flow/controls'
 import { MiniMap } from '@vue-flow/minimap'
-import { initialEdges, initialNodes } from './initial-elements.js'
 import { Moon, RotateCcw, Sun } from 'lucide-vue-next'
 import { nodeTypes } from '@/components/index.js'
+import { useDialogueData } from '@/composables/dialogueData.js'
 
-/**
- * `useVueFlow` provides:
- * 1. a set of methods to interact with the VueFlow instance (like `fitView`, `setViewport`, `addEdges`, etc)
- * 2. a set of event-hooks to listen to VueFlow events (like `onInit`, `onNodeDragStop`, `onConnect`, etc)
- * 3. the internal state of the VueFlow instance (like `nodes`, `edges`, `viewport`, etc)
- */
-const { onInit, onNodeDragStop, onConnect, addEdges, setViewport } = useVueFlow()
+const { createScene, deleteScene, onSceneCreate, onSceneDelete, onSceneUpdate, onSlotUpdate, updateScene } = useDialogueData()
 
-const nodes = ref(initialNodes)
+const { onInit, onNodeDragStop, onConnect, addEdges, setViewport, addNodes, updateNodeData, removeNodes, findNode } = useVueFlow()
 
-const edges = ref(initialEdges)
+onSceneCreate((sceneId, scene) => {
+  const position: XYPosition = {
+    x: 0,
+    y: 0
+  }
+  const newSceneNode: Node = {
+    id: sceneId,
+    position: position,
+    data: scene,
+    type: "scene"
+  }
+  addNodes(newSceneNode)
+})
+
+onSceneUpdate((sceneId, scene) => {
+  // console.log("update", sceneId, scene)
+  // check if the node exists first
+  const node = findNode(sceneId)
+  if (!node) {
+    const position: XYPosition = {
+      x: 0,
+      y: 0
+    }
+    const newSceneNode: Node = {
+      id: sceneId,
+      position: position,
+      data: scene,
+      type: "scene"
+    }
+    addNodes(newSceneNode)
+  } else {
+    updateNodeData(sceneId, scene)
+  }
+})
+
+onSceneDelete((sceneId) => {
+  removeNodes(sceneId)
+})
 
 // our dark mode toggle flag
 const dark = ref(false)
@@ -97,9 +128,7 @@ function toggleDarkMode() {
   <!-- it always fills up its parent container -->
   <VueFlow
     style="width: 100%; height: 100%;"
-    :nodes="nodes"
     :node-types="nodeTypes"
-    :edges="edges"
     :class="{ dark }"
     :default-viewport="{ zoom: 1.5 }"
     :min-zoom="0.2"
