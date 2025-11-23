@@ -30,7 +30,8 @@ const emit = defineEmits<{
       {{ props.data.sceneId }}
     </p>
     <input v-model="npcNameRef" />
-    <input v-model="sceneTextRef" />
+    <br />
+    <textarea v-model="sceneTextRef" />
   </div>
 </template>
 
