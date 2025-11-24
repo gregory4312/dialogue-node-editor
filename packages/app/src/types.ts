@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Aevarkan
 // Licensed under the GPLv3 license
 
-import type { Button, Scene } from "@workspace/common";
+import type { Button } from "@workspace/common";
 
 /**
  * Possible child nodes a visual scene can have.
@@ -21,13 +21,6 @@ export type SceneButtonSlot = "1" | "2" | "3" | "4" | "5" | "6"
  * Open and close commands.
  */
 export type SceneCommandSlot = "open" | "close"
-
-export interface VisualScene extends Scene {
-  /**
-   * Map of slots to their VueFlow node ids.
-   */
-  commandMap: Map<SceneCommandSlots, string>
-}
 
 export interface VisualSceneCommand {
   /**
