@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Aevarkan
 // Licensed under the GPLv3 license
 
-import type { SceneCommandSlot, VisualSceneCommand, VisualSlot } from "@/types";
+import type { ButtonSlotDataChange, SceneCommandDataChange, SceneCommandSlot, VisualSceneCommand, VisualSceneDataChange, VisualSlot } from "@/types";
 import { SCENE_MAX_BUTTONS, type Button, type Scene } from "@workspace/common";
 import { v4 as uuidv4 } from 'uuid'
 import deepEqual from 'fast-deep-equal'
@@ -19,11 +19,11 @@ export class VisualScene implements Scene {
   /**
    * The button slots that were last changed from the `updateScene` factory method.
    */
-  private lastButtonChanges = new Set<number>()
+  private lastButtonChanges: ButtonSlotDataChange[] = []
   /**
    * The commands that were last changed from the `updateScene` factory method.
    */
-  private lastCommandChanges = new Set<SceneCommandSlot>()
+  private lastCommandChanges: SceneCommandDataChange[] = []
 
   private constructor(
     public buttons: Button[],
@@ -106,22 +106,50 @@ export class VisualScene implements Scene {
 
     /** This is the FULL slot map, not just changed slots. Does not include deleted slots. */
     const updatedButtonMap = new Map<number, VisualSlot>()
-    const changedButtons = new Set<number>()
+    const updatedButtons = new Map<number, ButtonSlotDataChange>()
     for (let index = 0; index < SCENE_MAX_BUTTONS; index++) {
       // check if the buttons have changed
       const oldButton = oldScene.buttons[index]
       const newButton = updatedScene.buttons[index]
       const isEqual = deepEqual(oldButton, newButton)
+      const buttonUuid = oldScene.buttonMap.get(index)?.id ?? uuidv4()
       if (!isEqual) {
-        changedButtons.add(index)
+        const buttonModifiedChange: ButtonSlotDataChange = {
+          id: buttonUuid, // won't be the correct uuid if this is actually a creation. shouldn't be a problem though
+          index,
+          kind: "button",
+          change: "modified"
+        }
+        updatedButtons.set(index, buttonModifiedChange)
+      }
+      
+      // if there's a new button, but not an old one, then that's a creation
+      if (!oldButton && newButton) {
+        const buttonCreatedChange: ButtonSlotDataChange = {
+          id: buttonUuid,
+          index,
+          kind: "button",
+          change: "created"
+        }
+        updatedButtons.set(index, buttonCreatedChange)
       }
       
       // once this happens, it is purely for checking deletions
-      if (!newButton) continue
+      if (!newButton) {
+        if (oldButton) {
+          const buttonDeletedChange: ButtonSlotDataChange = {
+            id: buttonUuid,
+            index,
+            kind: "button",
+            change: "deleted"
+          }
+          updatedButtons.set(index, buttonDeletedChange)
+        }
+        continue
+      }
       
       // create the new button using the old uuid if possible
       // FIXME: not sure if this works for changing buttons around
-      const buttonUuid = oldScene.buttonMap.get(index)?.id ?? uuidv4()
       const newSlot: VisualSlot = {
         id: buttonUuid,
         index,
@@ -133,14 +161,15 @@ export class VisualScene implements Scene {
 
     // now the commands
     const updatedCommandMap = new Map<SceneCommandSlot, VisualSceneCommand>()
-    const changedCommands = new Set<SceneCommandSlot>()
+    const updatedCommands = new Map<SceneCommandSlot, SceneCommandDataChange>()
 
     // open commands
     const newOpenCommandsArray = updatedScene.openCommands
-    const isOpenCommandEqual = (deepEqual(oldScene.openCommands, newOpenCommandsArray))
+    const oldOpenCommandsArray = oldScene.openCommands
+    const isOpenCommandEqual = (deepEqual(oldOpenCommandsArray, newOpenCommandsArray))
     // if the incoming scene has opening commands, then add them
+    const openCommandId = oldScene.commandMap.get("open")?.id ?? uuidv4()
     if (newOpenCommandsArray.length > 0) {
-      const openCommandId = oldScene.commandMap.get("open")?.id ?? uuidv4()
       const openCommand: VisualSceneCommand = {
         commands: newOpenCommandsArray,
         id: openCommandId,
@@ -150,15 +179,41 @@ export class VisualScene implements Scene {
       updatedCommandMap.set("open", openCommand)
     }
     if (!isOpenCommandEqual) {
-      changedCommands.add("open")
+      const commandDataChange: SceneCommandDataChange = {
+        change: "modified",
+        kind: "sceneCommand",
+        id: openCommandId, // won't be correct if this is actually a creation, but this is resolved in the if statement
+        type: "open"
+      }
+      updatedCommands.set("open", commandDataChange)
+      // must be a creation
+      if (newOpenCommandsArray.length > 0 && oldOpenCommandsArray.length === 0) {
+        const addDataChange: SceneCommandDataChange = {
+          change: "created",
+          kind: "sceneCommand",
+          id: openCommandId,
+          type: "open"
+        }
+        updatedCommands.set("open", addDataChange)
+      // this must be a deletion
+      } else if (oldOpenCommandsArray.length > 0 && newOpenCommandsArray.length === 0) {
+        const removeDataChange: SceneCommandDataChange = {
+          change: "deleted",
+          kind: "sceneCommand",
+          id: openCommandId,
+          type: "open"
+        }
+        updatedCommands.set("open", removeDataChange)
+      }
     }
 
     // now close commands
     const newCloseCommandsArray = updatedScene.closeCommands
-    const isCloseCommandEqual = (deepEqual(oldScene.closeCommands, newCloseCommandsArray))
-    // if the incoming scene has opening commands, then add them
+    const oldCloseCommandsArray = oldScene.closeCommands
+    const isCloseCommandEqual = (deepEqual(oldCloseCommandsArray, newCloseCommandsArray))
+    // if the incoming scene has closing commands, then add them
+    const closeCommandId = oldScene.commandMap.get("close")?.id ?? uuidv4()
     if (newCloseCommandsArray.length > 0) {
-      const closeCommandId = oldScene.commandMap.get("close")?.id ?? uuidv4()
       const closeCommand: VisualSceneCommand = {
         commands: newCloseCommandsArray,
         id: closeCommandId,
@@ -168,7 +223,32 @@ export class VisualScene implements Scene {
       updatedCommandMap.set("close", closeCommand)
     }
     if (!isCloseCommandEqual) {
-      changedCommands.add("close")
+      const commandDataChange: SceneCommandDataChange = {
+        change: "modified",
+        kind: "sceneCommand",
+        id: closeCommandId, // won't be correct if this is actually a creation, but this is resolved in the if statement
+        type: "close"
+      }
+      updatedCommands.set("close", commandDataChange)
+      // must be a creation
+      if (newCloseCommandsArray.length > 0 && oldCloseCommandsArray.length === 0) {
+        const addDataChange: SceneCommandDataChange = {
+          change: "created",
+          kind: "sceneCommand",
+          id: closeCommandId,
+          type: "close"
+        }
+        updatedCommands.set("close", addDataChange)
+      // this must be a deletion
+      } else if (oldCloseCommandsArray.length > 0 && newCloseCommandsArray.length === 0) {
+        const removeDataChange: SceneCommandDataChange = {
+          change: "deleted",
+          kind: "sceneCommand",
+          id: closeCommandId,
+          type: "close"
+        }
+        updatedCommands.set("close", removeDataChange)
+      }
     }
     
     
@@ -184,19 +264,29 @@ export class VisualScene implements Scene {
       updatedButtonMap
     )
     // tracking info
-    updatedVisualScene.lastButtonChanges = changedButtons
-    updatedVisualScene.lastCommandChanges = changedCommands
+    updatedVisualScene.lastButtonChanges = Array.from(updatedButtons.values())
+    updatedVisualScene.lastCommandChanges = Array.from(updatedCommands.values())
     return updatedVisualScene
+  }
+
+  /**
+   * Get the slots and commands that were updated since the last `updateScene` factory method.
+   * @param clearAfter Whether to clear the update info after reading. Defaults to `false`.
+   */
+  public getLastDataChanges(clearAfter = false): VisualSceneDataChange[] {
+    const slots = this.getUpdatedSlots(clearAfter)
+    const commands = this.getUpdatedCommands(clearAfter)
+    return [...slots, ...commands]
   }
 
   /**
    * Get the slots that were updated since the last `updateScene` factory method.
    * @param clearAfter Whether to clear the update info after reading.
    */
-  public getUpdatedSlots(clearAfter = false): number[] {
+  private getUpdatedSlots(clearAfter = false): ButtonSlotDataChange[] {
     const result = [...this.lastButtonChanges]
     if (clearAfter) {
-      this.lastButtonChanges = new Set()
+      this.lastButtonChanges = []
     }
     return result
   }
@@ -205,10 +295,10 @@ export class VisualScene implements Scene {
    * Get the slots that were updated since the last `updateScene` factory method.
    * @param clearAfter Whether to clear the update info after reading.
    */
-  public getUpdatedCommands(clearAfter = false): SceneCommandSlot[] {
+  private getUpdatedCommands(clearAfter = false): SceneCommandDataChange[] {
     const result = [...this.lastCommandChanges]
     if (clearAfter) {
-      this.lastCommandChanges = new Set()
+      this.lastCommandChanges = []
     }
     return result
   }

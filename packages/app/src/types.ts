@@ -4,6 +4,45 @@
 import type { Button } from "@workspace/common";
 
 /**
+ * The ways data can change.
+ */
+export type DataChangeCategory = "created" | "modified" | "deleted"
+
+export type VisualSceneDataChange = SceneCommandDataChange | ButtonSlotDataChange
+
+export interface SceneCommandDataChange {
+  kind: "sceneCommand"
+  /**
+   * Unique identifier.
+   */
+  id: string
+  /**
+   * Whether the command runs on scene open or scene close.
+   */
+  type: SceneCommandSlot,
+  /**
+   * The type of change.
+   */
+  change: DataChangeCategory
+}
+
+export interface ButtonSlotDataChange {
+  kind: "button"
+  /**
+   * Uuid of this slot.
+   */
+  id: string
+  /**
+   * The slot's index, starting from 0.
+   */
+  index: number
+  /**
+   * The type of change.
+   */
+  change: DataChangeCategory
+}
+
+/**
  * Possible child nodes a visual scene can have.
  */
 export type SceneFunctionSlot = SceneCommandSlot | SceneButtonSlot
