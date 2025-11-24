@@ -295,6 +295,56 @@ export class VisualScene {
     }
     return result
   }
+  
+  /**
+   * The text displayed in the NPC dialogue.
+   */
+  public get sceneText() {
+    return this.scene.sceneText
+  }
+
+  /**
+   * The text displayed in the NPC dialogue.
+   */
+  public set sceneText(sceneText: string) {
+    this.scene.sceneText = sceneText
+  }
+
+  /**
+   * The name of the NPC in the dialogue view.
+   * 
+   * @remarks
+   * Is `npc_name` in JSON definition.
+   */
+  public get npcName() {
+   return this.scene.npcName
+  }
+  
+  /**
+   * The name of the NPC in the dialogue view.
+   * 
+   * @remarks
+   * Is `npc_name` in JSON definition.
+   */
+  public set npcName(npcName: string) {
+    this.scene.npcName = npcName
+  }
+
+  public getSlot(slotIndex: number) {
+    return this.buttonMap.get(slotIndex) ?? null
+  }
+
+  public getSlots() {
+    return [...this.buttonMap.values()]
+  }
+
+  public getCommand(commandSlot: SceneCommandSlot) {
+    return this.commandMap.get(commandSlot) ?? null
+  }
+
+  public getCommands() {
+    return [...this.commandMap.values()]
+  }
 
   /**
    * Returns the raw scene data of the visual scene.
