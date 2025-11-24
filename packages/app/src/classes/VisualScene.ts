@@ -16,6 +16,14 @@ export class VisualScene implements Scene {
    */
   private buttonMap: Map<number, VisualSlot>
   private commandMap: Map<SceneCommandSlot, VisualSceneCommand>
+  /**
+   * The button slots that were last changed from the `updateScene` factory method.
+   */
+  private lastButtonChanges = new Set<number>()
+  /**
+   * The commands that were last changed from the `updateScene` factory method.
+   */
+  private lastCommandChanges = new Set<SceneCommandSlot>()
 
   private constructor(
     public buttons: Button[],
@@ -98,14 +106,14 @@ export class VisualScene implements Scene {
 
     /** This is the FULL slot map, not just changed slots. Does not include deleted slots. */
     const updatedButtonMap = new Map<number, VisualSlot>()
-    const changedButtons: number[] = []
+    const changedButtons = new Set<number>()
     for (let index = 0; index < SCENE_MAX_BUTTONS; index++) {
       // check if the buttons have changed
       const oldButton = oldScene.buttons[index]
       const newButton = updatedScene.buttons[index]
       const isEqual = deepEqual(oldButton, newButton)
       if (!isEqual) {
-        changedButtons.push(index)
+        changedButtons.add(index)
       }
       
       // once this happens, it is purely for checking deletions
@@ -125,7 +133,7 @@ export class VisualScene implements Scene {
 
     // now the commands
     const updatedCommandMap = new Map<SceneCommandSlot, VisualSceneCommand>()
-    const changedCommands: SceneCommandSlot[] = []
+    const changedCommands = new Set<SceneCommandSlot>()
 
     // open commands
     const newOpenCommandsArray = updatedScene.openCommands
@@ -142,7 +150,7 @@ export class VisualScene implements Scene {
       updatedCommandMap.set("open", openCommand)
     }
     if (!isOpenCommandEqual) {
-      changedCommands.push("open")
+      changedCommands.add("open")
     }
 
     // now close commands
@@ -160,7 +168,7 @@ export class VisualScene implements Scene {
       updatedCommandMap.set("close", closeCommand)
     }
     if (!isCloseCommandEqual) {
-      changedCommands.push("close")
+      changedCommands.add("close")
     }
     
     
@@ -175,8 +183,34 @@ export class VisualScene implements Scene {
       updatedCommandMap,
       updatedButtonMap
     )
-    // TODO: add changed info here
+    // tracking info
+    updatedVisualScene.lastButtonChanges = changedButtons
+    updatedVisualScene.lastCommandChanges = changedCommands
     return updatedVisualScene
+  }
+
+  /**
+   * Get the slots that were updated since the last `updateScene` factory method.
+   * @param clearAfter Whether to clear the update info after reading.
+   */
+  public getUpdatedSlots(clearAfter = false): number[] {
+    const result = [...this.lastButtonChanges]
+    if (clearAfter) {
+      this.lastButtonChanges = new Set()
+    }
+    return result
+  }
+
+  /**
+   * Get the slots that were updated since the last `updateScene` factory method.
+   * @param clearAfter Whether to clear the update info after reading.
+   */
+  public getUpdatedCommands(clearAfter = false): SceneCommandSlot[] {
+    const result = [...this.lastCommandChanges]
+    if (clearAfter) {
+      this.lastCommandChanges = new Set()
+    }
+    return result
   }
   
 }
