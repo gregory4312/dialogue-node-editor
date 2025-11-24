@@ -1,10 +1,9 @@
 // Copyright (c) 2025 Aevarkan
 // Licensed under the GPLv3 license
 
-import { SCENE_MAX_BUTTONS, type Button, type DeleteSceneMessage, type GenericSceneMessage, type Scene, type SceneMessage } from "@workspace/common"
+import { type DeleteSceneMessage, type GenericSceneMessage, type SceneMessage } from "@workspace/common"
 import { useVsCode } from "./vscodeMessages";
-import type { VisualScene } from "@/types";
-import { toVisualScene } from "@/helpers/dataMapper";
+import { VisualScene } from "@/classes/VisualScene";
 
 // type SceneDelete = (sceneId: string) => void
 // type SceneGeneric = (sceneId: string, scene: Scene) => void
@@ -13,23 +12,26 @@ export function useDialogueData() {
 
   const { inWebview, postMessage } = useVsCode()
 
+  // this composable stores current visual scenes
+  const scenesMap = new Map<string, VisualScene>()
+
   // event listeners
   const listeners = {
     onSceneCreate: [] as ((sceneId: string, scene: VisualScene) => void)[],
     onSceneUpdate: [] as ((sceneId: string, scene: VisualScene) => void)[],
-    onSceneDelete: [] as ((sceneId: string) => void)[],
-    onSlotUpdate: [] as ((sceneId: string, index: number, button?: Button) => void)[]
+    onSceneDelete: [] as ((sceneId: string) => void)[]
   }
 
   /**
    * Sends a new scene to VSCode.
    */
-  function createScene(scene: Scene | VisualScene) {
+  function createScene(scene: VisualScene) {
+    scenesMap.set(scene.sceneId, scene)
     if (inWebview()) {
       const createSceneMessage: GenericSceneMessage = {
         sceneId: scene.sceneId,
         messageType: "createScene",
-        sceneData: scene
+        sceneData: scene.toScene()
       }
       postMessage(createSceneMessage)
     }
@@ -38,12 +40,13 @@ export function useDialogueData() {
   /**
    * Sends updated scene to VSCode.
    */
-  function updateScene(scene: Scene | VisualScene) {
+  function updateScene(scene: VisualScene) {
+    scenesMap.set(scene.sceneId, scene)
     if (inWebview()) {
       const updateSceneMessage: GenericSceneMessage = {
         sceneId: scene.sceneId,
         messageType: "updateScene",
-        sceneData: scene
+        sceneData: scene.toScene()
       }
       postMessage(updateSceneMessage)
     }
@@ -53,6 +56,7 @@ export function useDialogueData() {
    * Sends scene deletion data to VSCode.
    */
   function deleteScene(sceneId: string) {
+    scenesMap.delete(sceneId)
     if (inWebview()) {
       const deleteSceneMessage: DeleteSceneMessage = {
         messageType: "deleteScene",
@@ -62,10 +66,8 @@ export function useDialogueData() {
     }
   }
 
-  function onSlotUpdate(callback: (parentSceneId: string, index: number, button?: Button) => void) {
-    listeners.onSlotUpdate.push(callback)
-  }
-
+  // NOTE: These event listeners only fire from updates from VS Code
+  // maybe they will fire for more than that, but I don't really need to add that functionality yet.
   function onSceneCreate(callback: (sceneId: string, scene: VisualScene) => void) {
     listeners.onSceneCreate.push(callback)
   }
@@ -86,23 +88,29 @@ export function useDialogueData() {
 
     // check the message type, then send it
     switch (messageData.messageType) {
+      // don't actually listen to it, we store our own scenes to check
       case "createScene":
-        listeners.onSceneCreate.forEach(fn => fn(messageData.sceneId, toVisualScene(messageData.sceneData)))
-        break
       case "updateScene":
-        listeners.onSceneUpdate.forEach(fn => fn(messageData.sceneId, toVisualScene(messageData.sceneData)))
-        listeners.onSlotUpdate.forEach(fn => {
-          for (let index = 0; index < SCENE_MAX_BUTTONS; index++) {
-            const slotButton = messageData.sceneData.buttons[index] ?? undefined
-            fn(messageData.sceneId, index, slotButton)
-          }
-        })
+        const existingScene = scenesMap.get(messageData.sceneId)
+        // a new scene
+        if (!existingScene) {
+          const newScene = VisualScene.fromScene(messageData.sceneData)
+          listeners.onSceneCreate.forEach(fn => fn(newScene.sceneId, newScene))
+          scenesMap.set(newScene.sceneId, newScene)
+        // otherwise it must be an update
+        } else {
+          const updatedScene = VisualScene.updateScene(existingScene, messageData.sceneData)
+          listeners.onSceneUpdate.forEach(fn => fn(updatedScene.sceneId, updatedScene))
+          scenesMap.set(updatedScene.sceneId, updatedScene)
+        }
         break
+
       case "deleteScene":
         listeners.onSceneDelete.forEach(fn => fn(messageData.sceneId))
+        scenesMap.delete(messageData.sceneId)
         break
     }
   })
 
-  return { onSceneDelete, onSceneCreate, onSceneUpdate, deleteScene, createScene, updateScene, onSlotUpdate }
+  return { onSceneDelete, onSceneCreate, onSceneUpdate, deleteScene, createScene, updateScene }
 }
