@@ -7,7 +7,7 @@ import { MiniMap } from '@vue-flow/minimap'
 import { Moon, RotateCcw, Sun } from 'lucide-vue-next'
 import { useDialogueData } from '@/composables/dialogueData.js'
 import { useVsCode } from '@/composables/vscodeMessages'
-import type { ReadyMessage, Scene } from '@workspace/common'
+import type { Button, ReadyMessage, Scene } from '@workspace/common'
 import SceneNode from '@/components/SceneNode.vue'
 import ButtonSlotNode from '@/components/ButtonSlotNode.vue'
 import type { LogicalScene } from '@/classes/LogicalScene'
@@ -171,6 +171,19 @@ function toggleDarkMode() {
   dark.value = !dark.value
 }
 
+function handleButtonEdit(parentSceneId: string, nodeId: string, buttonIndex: number, button: Button) {
+  updateNodeData<VisualSlot>(nodeId, { button })
+
+  const existingScene = getScene(parentSceneId)
+  // should never happen
+  if (!existingScene) {
+    throw new Error("handleButtonEdit no scene")
+  }
+
+  existingScene.updateSlot(buttonIndex, button)
+  updateScene(existingScene)
+}
+
 function handleEditNpcName(sceneId: string, newName: string) {
   const existingScene = getScene(sceneId)
   // should never happen
@@ -228,7 +241,7 @@ function handleEditCommand(parentSceneId: string, nodeId: string, commandType: S
     </template>
 
     <template #node-button-slot="props">
-      <ButtonSlotNode v-bind="props" />
+      <ButtonSlotNode v-bind="props" @edit-button="handleButtonEdit" />
     </template>
 
     <template #node-command-slot="props">
