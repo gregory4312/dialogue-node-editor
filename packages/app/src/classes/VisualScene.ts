@@ -338,6 +338,29 @@ export class VisualScene {
     return [...this.buttonMap.values()]
   }
 
+  /**
+   * Sets the scene command in a slot, creating it if it doesn't already exist.
+   * @param commandSlot The slot to set the command in.
+   * @param newCommand The new set of commands.
+   * @returns The updated scene command.
+   */
+  public setCommand(commandSlot: SceneCommandSlot, newCommand: string[]) {
+    let command = this.commandMap.get(commandSlot)
+    if (command) {
+      command.commands = newCommand
+    // create a new one if it doesn't exist
+    } else {
+      command = {
+        id: uuidv4(),
+        commands: newCommand,
+        parentSceneId: this.sceneId,
+        type: commandSlot
+      }
+      this.commandMap.set(commandSlot, command)
+    }
+    return command
+  }
+
   public getCommand(commandSlot: SceneCommandSlot) {
     return this.commandMap.get(commandSlot) ?? null
   }
