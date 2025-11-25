@@ -341,23 +341,30 @@ export class VisualScene {
   /**
    * Sets the scene command in a slot, creating it if it doesn't already exist.
    * @param commandSlot The slot to set the command in.
-   * @param newCommand The new set of commands.
+   * @param newCommands The new set of commands.
    * @returns The updated scene command.
    */
-  public setCommand(commandSlot: SceneCommandSlot, newCommand: string[]) {
+  public setCommand(commandSlot: SceneCommandSlot, newCommands: string[]) {
     let command = this.commandMap.get(commandSlot)
     if (command) {
-      command.commands = newCommand
+      command.commands = newCommands
     // create a new one if it doesn't exist
     } else {
       command = {
         id: uuidv4(),
-        commands: newCommand,
+        commands: newCommands,
         parentSceneId: this.sceneId,
         type: commandSlot
       }
       this.commandMap.set(commandSlot, command)
     }
+    // set it in the actual underlying scene
+    if (commandSlot === "open") {
+      this.scene.openCommands = newCommands
+    } else {
+      this.scene.closeCommands = newCommands
+    }
+
     return command
   }
 
