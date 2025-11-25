@@ -2,7 +2,7 @@
 // Licensed under the GPLv3 license
 
 import type { ButtonSlotDataChange, SceneCommandDataChange, SceneCommandSlot, VisualSceneCommand, LogicalSceneDataChange, VisualSlot } from "@/types";
-import { SCENE_MAX_BUTTONS, type Scene } from "@workspace/common";
+import { SCENE_MAX_BUTTONS, type Button, type Scene } from "@workspace/common";
 import { v4 as uuidv4 } from 'uuid'
 import deepEqual from 'fast-deep-equal'
 
@@ -328,6 +328,79 @@ export class LogicalScene {
    */
   public set npcName(npcName: string) {
     this.scene.npcName = npcName
+  }
+
+  /**
+   * Updates the button in the specified slot.
+   * @param slotIndex The button slot index.
+   * @param newButton The updated button.
+   * 
+   * @returns Returns the updated slot.
+   * 
+   * @throws Throws if the slot hasn't been created.
+   */
+  public updateSlot(slotIndex: number, newButton: Button): VisualSlot {
+    const targetedSlot = this.buttonMap.get(slotIndex)
+    if (!targetedSlot) {
+      throw new Error(`Scene "${this.sceneId}" does not have a slot for index ${slotIndex} already created.`)
+    }
+    targetedSlot.button = newButton
+    this.scene.buttons[slotIndex] = newButton
+    return targetedSlot
+  }
+
+  /**
+   * Adds a button to a new scene slot.
+   * @param newButton The new button.
+   * @returns The newly created slot.
+   */
+  public addSlot(newButton: Button): VisualSlot {
+    const currentSlots = this.scene.buttons.length
+    if (currentSlots >= SCENE_MAX_BUTTONS) {
+      throw new Error(`Cannot add more than maximum number of ${SCENE_MAX_BUTTONS} slots.`)
+    }
+    const newTargetIndex = currentSlots + 1
+    const newSlot: VisualSlot = {
+      id: uuidv4(),
+      index: newTargetIndex,
+      parentSceneId: this.sceneId,
+      button: newButton
+    }
+    this.buttonMap.set(newTargetIndex, newSlot)
+    this.scene.buttons.push(newButton)
+    return newSlot
+  }
+
+  /**
+   * Swaps the slots in the provided indices.
+   * @returns The slot now in the first index, and the slot now in the second index.
+   * 
+   * @throws Throws if one or both slots are not created.
+   * 
+   * @throws Throws if the first and second index are the same.
+   */
+  public swapSlots(firstIndex: number, secondIndex: number): [VisualSlot, VisualSlot] {
+    if (firstIndex === secondIndex) {
+      throw new Error("Cannot swap the same slots.")
+    }
+    const firstSlot = this.buttonMap.get(firstIndex)
+    const secondSlot = this.buttonMap.get(secondIndex)
+    const firstButton = this.scene.buttons[firstIndex]
+    const secondButton = this.scene.buttons[secondIndex]
+    if (!firstSlot || !secondSlot || !firstButton || !secondButton) {
+      throw new Error(`Cannot swap slots ${firstIndex} and ${secondIndex} for scene ${this.sceneId}. One or both slots are empty!`)
+    }
+    // swap the indices themselves
+    firstSlot.index = secondIndex
+    secondSlot.index = firstIndex
+
+    // swap in map
+    this.buttonMap.set(firstIndex, secondSlot)
+    this.buttonMap.set(secondIndex, firstSlot)
+    // swap in array
+    this.scene.buttons[firstIndex] = secondSlot.button
+    this.scene.buttons[secondIndex] = firstSlot.button
+    return [secondSlot, firstSlot]
   }
 
   public getSlot(slotIndex: number) {
