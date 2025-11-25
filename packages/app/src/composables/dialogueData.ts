@@ -23,6 +23,13 @@ export function useDialogueData() {
   }
 
   /**
+   * Gets the current scene for this id.
+   */
+  function getScene(sceneId: string) {
+    return scenesMap.get(sceneId) ?? null
+  }
+
+  /**
    * Sends a new scene to VSCode.
    */
   function createScene(scene: VisualScene) {
@@ -112,5 +119,5 @@ export function useDialogueData() {
     }
   })
 
-  return { onSceneDelete, onSceneCreate, onSceneUpdate, deleteScene, createScene, updateScene }
+  return { onSceneDelete, onSceneCreate, onSceneUpdate, deleteScene, createScene, updateScene, getScene }
 }
