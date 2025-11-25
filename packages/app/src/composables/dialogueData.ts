@@ -3,7 +3,7 @@
 
 import { type DeleteSceneMessage, type GenericSceneMessage, type SceneMessage } from "@workspace/common"
 import { useVsCode } from "./vscodeMessages";
-import { VisualScene } from "@/classes/VisualScene";
+import { LogicalScene } from "@/classes/LogicalScene";
 
 // type SceneDelete = (sceneId: string) => void
 // type SceneGeneric = (sceneId: string, scene: Scene) => void
@@ -12,13 +12,13 @@ export function useDialogueData() {
 
   const { inWebview, postMessage } = useVsCode()
 
-  // this composable stores current visual scenes
-  const scenesMap = new Map<string, VisualScene>()
+  // this composable stores current logical scenes
+  const scenesMap = new Map<string, LogicalScene>()
 
   // event listeners
   const listeners = {
-    onSceneCreate: [] as ((sceneId: string, scene: VisualScene) => void)[],
-    onSceneUpdate: [] as ((sceneId: string, scene: VisualScene) => void)[],
+    onSceneCreate: [] as ((sceneId: string, scene: LogicalScene) => void)[],
+    onSceneUpdate: [] as ((sceneId: string, scene: LogicalScene) => void)[],
     onSceneDelete: [] as ((sceneId: string, children: string[]) => void)[]
   }
 
@@ -32,7 +32,7 @@ export function useDialogueData() {
   /**
    * Creates a scene, relaying the creation to VSCode.
    */
-  function createScene(scene: VisualScene) {
+  function createScene(scene: LogicalScene) {
     scenesMap.set(scene.sceneId, scene)
     if (inWebview()) {
       const createSceneMessage: GenericSceneMessage = {
@@ -47,7 +47,7 @@ export function useDialogueData() {
   /**
    * Updates the scene, relaying the update to VSCode.
    */
-  function updateScene(scene: VisualScene) {
+  function updateScene(scene: LogicalScene) {
     scenesMap.set(scene.sceneId, scene)
     if (inWebview()) {
       const updateSceneMessage: GenericSceneMessage = {
@@ -75,11 +75,11 @@ export function useDialogueData() {
 
   // NOTE: These event listeners only fire from updates from VS Code
   // maybe they will fire for more than that, but I don't really need to add that functionality yet.
-  function onSceneCreate(callback: (sceneId: string, scene: VisualScene) => void) {
+  function onSceneCreate(callback: (sceneId: string, scene: LogicalScene) => void) {
     listeners.onSceneCreate.push(callback)
   }
 
-  function onSceneUpdate(callback: (sceneId: string, scene: VisualScene) => void) {
+  function onSceneUpdate(callback: (sceneId: string, scene: LogicalScene) => void) {
     listeners.onSceneUpdate.push(callback)
   }
 
@@ -104,12 +104,12 @@ export function useDialogueData() {
         const existingScene = scenesMap.get(messageData.sceneId)
         // a new scene
         if (!existingScene) {
-          const newScene = VisualScene.fromScene(messageData.sceneData)
+          const newScene = LogicalScene.fromScene(messageData.sceneData)
           listeners.onSceneCreate.forEach(fn => fn(newScene.sceneId, newScene))
           scenesMap.set(newScene.sceneId, newScene)
         // otherwise it must be an update
         } else {
-          const updatedScene = VisualScene.updateScene(existingScene, messageData.sceneData)
+          const updatedScene = LogicalScene.updateScene(existingScene, messageData.sceneData)
           listeners.onSceneUpdate.forEach(fn => fn(updatedScene.sceneId, updatedScene))
           scenesMap.set(updatedScene.sceneId, updatedScene)
         }

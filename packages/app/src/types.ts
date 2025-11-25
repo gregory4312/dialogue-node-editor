@@ -8,7 +8,7 @@ import type { Button } from "@workspace/common";
  */
 export type DataChangeCategory = "created" | "modified" | "deleted"
 
-export type VisualSceneDataChange = SceneCommandDataChange | ButtonSlotDataChange
+export type LogicalSceneDataChange = SceneCommandDataChange | ButtonSlotDataChange
 
 export interface SceneCommandDataChange {
   readonly kind: "sceneCommand"
@@ -43,12 +43,12 @@ export interface ButtonSlotDataChange {
 }
 
 /**
- * Possible child nodes a visual scene can have.
+ * Possible child nodes a logical scene can have.
  */
 export type SceneFunctionSlot = SceneCommandSlot | SceneButtonSlot
 
 /**
- * Possible button slots a visual scene can have.
+ * Possible button slots a logical scene can have.
  * 
  * @todo
  * This is a hardcoded 6 button limit.

@@ -1,12 +1,12 @@
 // Copyright (c) 2025 Aevarkan
 // Licensed under the GPLv3 license
 
-import type { ButtonSlotDataChange, SceneCommandDataChange, SceneCommandSlot, VisualSceneCommand, VisualSceneDataChange, VisualSlot } from "@/types";
+import type { ButtonSlotDataChange, SceneCommandDataChange, SceneCommandSlot, VisualSceneCommand, LogicalSceneDataChange, VisualSlot } from "@/types";
 import { SCENE_MAX_BUTTONS, type Scene } from "@workspace/common";
 import { v4 as uuidv4 } from 'uuid'
 import deepEqual from 'fast-deep-equal'
 
-export class VisualScene {
+export class LogicalScene {
   
   /**
    * Map of button slots to their node ids.
@@ -42,14 +42,14 @@ export class VisualScene {
   }
 
   /**
-   * Creates a new visual scene from a scene.
+   * Creates a new logical scene from a scene.
    * @param scene The raw scene.
-   * @returns A new visual scene.
+   * @returns A new logical scene.
    * 
    * @remarks
    * This must not be used to update an existing scene.
    */
-  public static fromScene(scene: Scene): VisualScene {
+  public static fromScene(scene: Scene): LogicalScene {
     // making ids for the buttons
     const buttonMap = new Map<number, VisualSlot>()
     const buttons = scene.buttons
@@ -81,8 +81,8 @@ export class VisualScene {
     commandMap.set("close", closeCommand)
     commandMap.set("open", openCommand)
 
-    // now that all the ids are made, we can create the visual scene
-    const visualScene = new VisualScene(
+    // now that all the ids are made, we can create the logical scene
+    const visualScene = new LogicalScene(
       scene,
       commandMap,
       buttonMap
@@ -96,7 +96,7 @@ export class VisualScene {
    * @param updatedScene The updated scene.
    * @throws Throws if the scene ids are not the same.
    */
-  public static updateScene(oldScene: VisualScene, updatedScene: Scene): VisualScene {
+  public static updateScene(oldScene: LogicalScene, updatedScene: Scene): LogicalScene {
     const rawOldScene = oldScene.scene
     if (rawOldScene.sceneId !== updatedScene.sceneId) {
       throw new Error(`Cannot update scene: IDs do not match (${rawOldScene.sceneId} !== ${updatedScene.sceneId})`);
@@ -251,7 +251,7 @@ export class VisualScene {
     
     
     // now the new scene can be constructed
-    const updatedVisualScene = new VisualScene(
+    const updatedVisualScene = new LogicalScene(
       updatedScene,
       updatedCommandMap,
       updatedButtonMap
@@ -266,7 +266,7 @@ export class VisualScene {
    * Get the slots and commands that were updated since the last `updateScene` factory method.
    * @param clearAfter Whether to clear the update info after reading. Defaults to `false`.
    */
-  public getLastDataChanges(clearAfter = false): VisualSceneDataChange[] {
+  public getLastDataChanges(clearAfter = false): LogicalSceneDataChange[] {
     const slots = this.getUpdatedSlots(clearAfter)
     const commands = this.getUpdatedCommands(clearAfter)
     return [...slots, ...commands]
@@ -377,7 +377,7 @@ export class VisualScene {
   }
 
   /**
-   * Returns the raw scene data of the visual scene.
+   * Returns the raw scene data of the logical scene.
    */
   public toScene(): Scene {
     const rawScene: Scene = {

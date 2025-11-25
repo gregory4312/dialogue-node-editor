@@ -10,7 +10,7 @@ import { useVsCode } from '@/composables/vscodeMessages'
 import type { ReadyMessage, Scene } from '@workspace/common'
 import SceneNode from '@/components/SceneNode.vue'
 import ButtonSlotNode from '@/components/ButtonSlotNode.vue'
-import type { VisualScene } from '@/classes/VisualScene'
+import type { LogicalScene } from '@/classes/LogicalScene'
 import SceneCommandNode from '@/components/SceneCommandNode.vue'
 import { toCommandNode, toSceneNode, toSlotNode } from '@/helpers/nodes'
 import type { DataChangeCategory, SceneCommandSlot, VisualSceneCommand, VisualSlot } from '@/types'
@@ -79,7 +79,7 @@ function handleButtonSlotUpdate(update: Exclude<DataChangeCategory, "deleted">, 
   }
 }
 
-function addNewScene(newScene: VisualScene) {
+function addNewScene(newScene: LogicalScene) {
   const sceneNode = toSceneNode(newScene.toScene())
   addNodes(sceneNode)
 
