@@ -1,80 +1,95 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VueFlow, useVueFlow, type Node, type XYPosition } from '@vue-flow/core'
+import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { ControlButton, Controls } from '@vue-flow/controls'
 import { MiniMap } from '@vue-flow/minimap'
 import { Moon, RotateCcw, Sun } from 'lucide-vue-next'
 import { useDialogueData } from '@/composables/dialogueData.js'
 import { useVsCode } from '@/composables/vscodeMessages'
-import type { ReadyMessage } from '@workspace/common'
+import type { ReadyMessage, Scene } from '@workspace/common'
 import SceneNode from '@/components/SceneNode.vue'
-import type { VisualScene, VisualSlot } from '@/types'
 import ButtonSlotNode from '@/components/ButtonSlotNode.vue'
+import type { VisualScene } from '@/classes/VisualScene'
+import SceneCommandNode from '@/components/SceneCommandNode.vue'
+import { toCommandNode, toSceneNode, toSlotNode } from '@/helpers/nodes'
+import type { DataChangeCategory, VisualSceneCommand, VisualSlot } from '@/types'
 
-const { createScene, deleteScene, onSceneCreate, onSceneDelete, onSceneUpdate, onSlotUpdate, updateScene } = useDialogueData()
+const { createScene, deleteScene, onSceneCreate, onSceneDelete, onSceneUpdate, updateScene, getScene } = useDialogueData()
 const { inWebview, postMessage } = useVsCode()
 
 const { onInit, onNodeDragStop, onConnect, addEdges, setViewport, addNodes, updateNodeData, removeNodes, findNode } = useVueFlow()
 
-// the key is sceneId
-const sceneMap = new Map<string, VisualScene>()
-
-onSceneCreate((sceneId, scene) => {
-  sceneMap.set(sceneId, scene)
-  const position: XYPosition = {
-    x: 0,
-    y: 0
-  }
-  const newSceneNode: Node = {
-    id: sceneId,
-    position: position,
-    data: scene,
-    type: "scene"
-  }
-  addNodes(newSceneNode)
-
-  scene.buttons.forEach((button, index) => {
-    const slot: VisualSlot = {
-      index,
-      parentSceneId: sceneId,
-      button
-    }
-    const slotNode: Node = {
-      // TODO: change id to uuid
-      id: sceneId + index,
-      position: { x: 0, y: 10 },
-      data: slot,
-      type: "button-slot"
-    }
-    addNodes(slotNode)
-  })
+onSceneCreate((_sceneId, scene) => {
+  addNewScene(scene)
 })
 
 onSceneUpdate((sceneId, scene) => {
-  sceneMap.set(sceneId, scene)
   // console.log("update", sceneId, scene)
   // check if the node exists first
   const node = findNode(sceneId)
   if (!node) {
-    const position: XYPosition = {
-      x: 0,
-      y: 0
-    }
-    const newSceneNode: Node = {
-      id: sceneId,
-      position: position,
-      data: scene,
-      type: "scene"
-    }
-    addNodes(newSceneNode)
+    console.warn("scene update was actually a creation!")
+    addNewScene(scene)
+  // actually updating!
   } else {
-    updateNodeData(sceneId, scene)
+    updateNodeData<Scene>(sceneId, { npcName: scene.npcName, sceneText: scene.sceneText })
+    // now the slots
+    const updates = scene.getLastDataChanges(true)
+    updates.forEach(update => {
+      switch (update.change) {
+        case 'created':
+        case 'modified':
+          if (update.kind === "button") {
+            // created/modified means it'll be there
+            handleButtonSlotUpdate(update.change, scene.getSlot(update.index)!)
+          } else {
+            // created/modified means it'll be there
+            handleCommandSlotUpdate(update.change, scene.getCommand(update.type)!)
+          }
+          break
+
+        case 'deleted':
+          removeNodes(update.id)
+          break
+      }
+    })
   }
 })
 
+function handleCommandSlotUpdate(update: Exclude<DataChangeCategory, "deleted">, command: VisualSceneCommand) {
+  switch (update) {
+    case 'created':
+      addNodes(toCommandNode(command))
+      break
+    case 'modified':
+      updateNodeData(command.id, command)
+      break
+  }
+}
+
+function handleButtonSlotUpdate(update: Exclude<DataChangeCategory, "deleted">, slot: VisualSlot) {
+    switch (update) {
+    case 'created':
+      addNodes(toSlotNode(slot))
+      break
+    case 'modified':
+      updateNodeData(slot.id, slot)
+      break
+  }
+}
+
+function addNewScene(newScene: VisualScene) {
+  const sceneNode = toSceneNode(newScene.toScene())
+  addNodes(sceneNode)
+
+  newScene.getSlots().forEach((slot) => {
+    const slotNode = toSlotNode(slot)
+    addNodes(slotNode)
+  })
+}
+
 onSceneDelete((sceneId) => {
-  sceneMap.delete(sceneId)
   removeNodes(sceneId)
 })
 
@@ -153,7 +168,7 @@ function toggleDarkMode() {
 }
 
 function handleEditNpcName(sceneId: string, newName: string) {
-  const existingScene = sceneMap.get(sceneId)
+  const existingScene = getScene(sceneId)
   // should never happen
   if (!existingScene) {
     throw new Error("handleEditNpcName no scene")
@@ -163,7 +178,7 @@ function handleEditNpcName(sceneId: string, newName: string) {
 }
 
 function handleEditSceneText(sceneId: string, newText: string) {
-  const existingScene = sceneMap.get(sceneId)
+  const existingScene = getScene(sceneId)
   // should never happen
   if (!existingScene) {
     throw new Error("handleEditSceneText no scene")
@@ -192,6 +207,10 @@ function handleEditSceneText(sceneId: string, newText: string) {
 
     <template #node-button-slot="props">
       <ButtonSlotNode v-bind="props" />
+    </template>
+
+    <template #node-command-slot="props">
+      <SceneCommandNode v-bind="props" />
     </template>
 
     <Controls position="top-left">
