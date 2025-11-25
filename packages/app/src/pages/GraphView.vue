@@ -87,6 +87,10 @@ function addNewScene(newScene: VisualScene) {
     const slotNode = toSlotNode(slot)
     addNodes(slotNode)
   })
+  newScene.getCommands().forEach(cmd => {
+    const commandNode = toCommandNode(cmd)
+    addNodes(commandNode)
+  })
 }
 
 onSceneDelete((sceneId, children) => {
