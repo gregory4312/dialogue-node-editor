@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Aevarkan
 // Licensed under the GPLv3 license
 
-import type { ButtonSlotDataChange, SceneCommandDataChange, SceneCommandSlot, VisualSceneCommand, LogicalSceneDataChange, VisualSlot } from "@/types";
+import type { ButtonSlotDataChange, SceneCommandDataChange, SceneCommandSlot, VisualSceneCommand, LogicalSceneDataChange, VisualSlot, VisualScene } from "@/types";
 import { SCENE_MAX_BUTTONS, type Button, type Scene } from "@workspace/common";
 import { v4 as uuidv4 } from 'uuid'
 import deepEqual from 'fast-deep-equal'
@@ -461,6 +461,21 @@ export class LogicalScene {
       ...this.scene
     }
     return rawScene
+  }
+
+  /**
+   * Gets the visual scene representation of this logical scene.
+   */
+  public getVisualScene(): VisualScene {
+    const visualScene: VisualScene = {
+      sceneId: this.sceneId,
+      sceneText: this.sceneText,
+      npcName: this.npcName,
+      openCommandNode: this.commandMap.get("open")?.id,
+      closeCommandNode: this.commandMap.get("close")?.id,
+      buttonNodes: Array.from(this.buttonMap.values()).map(btn => btn.id)
+    }
+    return visualScene
   }
   
 }

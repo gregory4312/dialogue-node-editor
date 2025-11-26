@@ -61,6 +61,45 @@ export type SceneButtonSlot = "1" | "2" | "3" | "4" | "5" | "6"
  */
 export type SceneCommandSlot = "open" | "close"
 
+/**
+ * Visual representation of a scene.
+ */
+export interface VisualScene {
+  /**
+   * The scene identifier.
+   * 
+   * @remarks
+   * Is the `scene_tag` in JSON definition.
+   */
+  sceneId: string
+  /**
+   * The name of the NPC in the dialogue view.
+   * 
+   * @remarks
+   * Is `npc_name` in JSON definition.
+   */
+  npcName: string
+  /**
+   * The text displayed by the NPC.
+   */
+  sceneText: string
+  /**
+   * The uuid of the scene's open command node.
+   */
+  openCommandNode?: string
+  /**
+   * The uuid of the scene's close command node.
+   */
+  closeCommandNode?: string
+  /**
+   * The uuids of the scene's button nodes.
+   * 
+   * @remarks
+   * There is a maximum of `6` buttons per scene.
+   */
+  buttonNodes: string[]
+}
+
 export interface VisualSceneCommand {
   /**
    * Unique identifier.

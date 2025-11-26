@@ -1,9 +1,8 @@
 // Copyright (c) 2025 Aevarkan
 // Licensed under the GPLv3 license
 
-import type { VisualSceneCommand, VisualSlot } from "@/types";
+import type { VisualScene, VisualSceneCommand, VisualSlot } from "@/types";
 import type { Node, XYPosition } from "@vue-flow/core";
-import type { Scene } from "@workspace/common";
 
 const defaultLocation: XYPosition = {
   x: 0,
@@ -13,8 +12,8 @@ const defaultLocation: XYPosition = {
 /**
  * Creates a node of type `scene`.
  */
-export function toSceneNode(scene: Scene, location: XYPosition = defaultLocation) {
-  const sceneNode: Node<Scene> = {
+export function toSceneNode(scene: VisualScene, location: XYPosition = defaultLocation) {
+  const sceneNode: Node<VisualScene> = {
     id: scene.sceneId,
     position: location,
     data: scene,

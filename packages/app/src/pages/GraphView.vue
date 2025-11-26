@@ -7,13 +7,13 @@ import { MiniMap } from '@vue-flow/minimap'
 import { Moon, RotateCcw, Sun } from 'lucide-vue-next'
 import { useDialogueData } from '@/composables/dialogueData.js'
 import { useVsCode } from '@/composables/vscodeMessages'
-import type { Button, ReadyMessage, Scene } from '@workspace/common'
+import type { Button, ReadyMessage } from '@workspace/common'
 import SceneNode from '@/components/SceneNode.vue'
 import ButtonSlotNode from '@/components/ButtonSlotNode.vue'
 import type { LogicalScene } from '@/classes/LogicalScene'
 import SceneCommandNode from '@/components/SceneCommandNode.vue'
 import { toCommandNode, toSceneNode, toSlotNode } from '@/helpers/nodes'
-import type { DataChangeCategory, SceneCommandSlot, VisualSceneCommand, VisualSlot } from '@/types'
+import type { DataChangeCategory, SceneCommandSlot, VisualScene, VisualSceneCommand, VisualSlot } from '@/types'
 
 const { createScene, deleteScene, onSceneCreate, onSceneDelete, onSceneUpdate, updateScene, getScene } = useDialogueData()
 const { inWebview, postMessage } = useVsCode()
@@ -33,7 +33,7 @@ onSceneUpdate((sceneId, scene) => {
     addNewScene(scene)
   // actually updating!
   } else {
-    updateNodeData<Scene>(sceneId, { npcName: scene.npcName, sceneText: scene.sceneText })
+    updateNodeData<VisualScene>(sceneId, { ...scene.getVisualScene() })
     // now the slots
     const updates = scene.getLastDataChanges(true)
     updates.forEach(update => {
@@ -80,7 +80,7 @@ function handleButtonSlotUpdate(update: Exclude<DataChangeCategory, "deleted">, 
 }
 
 function addNewScene(newScene: LogicalScene) {
-  const sceneNode = toSceneNode(newScene.toScene())
+  const sceneNode = toSceneNode(newScene.getVisualScene())
   addNodes(sceneNode)
 
   newScene.getSlots().forEach((slot) => {
@@ -191,7 +191,7 @@ function handleEditNpcName(sceneId: string, newName: string) {
     throw new Error("handleEditNpcName no scene")
   }
   // update for vueflow
-  updateNodeData<Scene>(sceneId, { npcName: newName })
+  updateNodeData<VisualScene>(sceneId, { npcName: newName })
 
   existingScene.npcName = newName
   updateScene(existingScene)
@@ -204,7 +204,7 @@ function handleEditSceneText(sceneId: string, newText: string) {
     throw new Error("handleEditSceneText no scene")
   }
   // update for vueflow
-  updateNodeData<Scene>(sceneId, { sceneText: newText })
+  updateNodeData<VisualScene>(sceneId, { sceneText: newText })
 
   existingScene.sceneText = newText
   updateScene(existingScene)

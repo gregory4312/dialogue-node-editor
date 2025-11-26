@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { type NodeProps } from '@vue-flow/core'
-import type { Scene } from '@workspace/common';
 import { computed } from 'vue';
+import type { VisualScene } from '@/types';
 
-const props = defineProps<NodeProps<Scene>>()
+const props = defineProps<NodeProps<VisualScene>>()
 
 // sceneId change means deleting the scene
 // no need to track it
