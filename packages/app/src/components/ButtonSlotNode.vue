@@ -58,11 +58,8 @@ const emit = defineEmits<{
     <p>
       {{ props.data.index + 1 }}
     </p>
-    <!-- show button info if it exists -->
-    <div v-if="buttonRef">
-      <input v-model="displayName" />
-      <textarea v-model="commandText" />
-    </div>
+    <input v-model="displayName" />
+    <textarea v-model="commandText" />
   </div>
 </template>
 
