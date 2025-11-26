@@ -2,29 +2,34 @@
 import type { VisualSlot } from '@/types';
 import { type NodeProps } from '@vue-flow/core'
 import type { Button } from '@workspace/common';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps<NodeProps<VisualSlot>>()
-
-
-// const buttonRef = computed({
-//   get: () => props.data.button,
-//   set: (button: Button) => {
-//     emit('editButton', props.data.parentSceneId, props.data.id, props.data.index, { ...button })
-//     console.log({...button})
-//   }
-// })
-
 const buttonRef = ref<Button>({ ...props.data.button })
 
+const commandText = computed({
+  get: () => buttonRef.value.commands.join("\n"),
+  set: (newCommands) => buttonRef.value.commands = newCommands.split("\n")
+})
+
 watch(
-    buttonRef,
-    (newButton) => {
-      emit('editButton', props.data.parentSceneId, props.data.id, props.data.index, { ...newButton })
-      // console.log({...newButton})
-    },
-    { deep: true }
-  )
+  buttonRef,
+  (newButton) => {
+    console.log(newButton)
+    emit(
+      'editButton',
+      props.data.parentSceneId,
+      props.data.id,
+      props.data.index,
+      {
+        ...newButton,
+        // because the reactivity causes problems
+        commands: [...newButton.commands]
+      }
+    )
+  },
+  { deep: true }
+)
   
 const emit = defineEmits<{
   (event: 'editButton', parentSceneId: string, nodeId: string, buttonIndex: number, button: Button): void
@@ -42,7 +47,7 @@ const emit = defineEmits<{
     <!-- show button info if it exists -->
     <div v-if="buttonRef">
       <input v-model="buttonRef.displayName" />
-      <input v-model="buttonRef.commands" />
+      <input v-model="commandText" />
     </div>
   </div>
 </template>
