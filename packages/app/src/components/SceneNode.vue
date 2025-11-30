@@ -53,14 +53,14 @@ const sceneTextUuid = `scene-text-${localUuid}`
       <span :id="openUuid">
         Open Command:
       </span>
-      <button :aria-labelledby="openUuid">
+      <button class="command-button" :aria-labelledby="openUuid">
         <ArrowUpLeft />
       </button>
 
       <span :id="closeUuid">
         Close Command:
       </span>
-      <button :aria-labelledby="closeUuid">
+      <button class="command-button" :aria-labelledby="closeUuid">
         <ArrowUpLeft />
       </button>
 
@@ -123,6 +123,15 @@ const sceneTextUuid = `scene-text-${localUuid}`
   grid-template-rows: repeat(2, auto);    /* 2 rows */
   gap: 8px;                               /* spacing */
   width: 100%;
+}
+
+button {
+  border-radius: 5%;
+}
+
+.command-button {
+  width: 100%;
+  height: 40px;
 }
 
 .button-grid button,
