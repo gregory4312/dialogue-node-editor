@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { useNodeDrag } from '@/composables/manualDrag';
 import type { SceneCommandSlot, VisualSceneCommand } from '@/types';
 import { type NodeProps } from '@vue-flow/core'
 import { computed } from 'vue';
 
 const props = defineProps<NodeProps<VisualSceneCommand>>()
+
+const drag = useNodeDrag(props.id)
 
 const commandsRef = computed({
   get: () => props.data.commands.join("\n"),
@@ -18,7 +21,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="scene-node-container">
+  <div class="scene-node-container" @mousedown="drag.onMouseDown">
     <p>
       {{ props.data.parentSceneId }}
     </p>

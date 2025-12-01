@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import { useNodeDrag } from '@/composables/manualDrag';
 import type { VisualSlot } from '@/types';
 import { type NodeProps } from '@vue-flow/core'
 import type { Button } from '@workspace/common';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<NodeProps<VisualSlot>>()
+
+const drag = useNodeDrag(props.id)
+
 const buttonRef = ref<Button>({ ...props.data.button })
 
 watch(
@@ -51,7 +55,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="scene-node-container">
+  <div class="scene-node-container" @mousedown="drag.onMouseDown">
     <p>
       {{ props.data.parentSceneId }}
     </p>
