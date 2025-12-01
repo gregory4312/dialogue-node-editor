@@ -18,21 +18,61 @@ const commandsRef = computed({
 const emit = defineEmits<{
   (event: 'editCommand', parentSceneId: string, nodeId: string, commandType: SceneCommandSlot, newCommands: string[]): void
 }>()
+
+// uuids
+const sceneUuid = `scene-id-${props.data.id}`
+const indexUuid = `button-index-${props.data.id}`
+const commandTextUuid = `button-commands-${props.data.id}`
 </script>
 
 <template>
-  <div class="scene-node-container" @mousedown="drag.onMouseDown">
-    <p>
-      {{ props.data.parentSceneId }}
-    </p>
-    <p>
-      {{ props.data.type }}
-    </p>
-    <!-- show button info if it exists -->
-    <textarea v-model="commandsRef" />
+  <div class="command-node-container" @mousedown="drag.onMouseDown">
+    <div class="command-node-header">
+      <label :for=sceneUuid>
+        Parent Scene:
+      </label>
+      <span :id=sceneUuid>
+        {{ props.data.parentSceneId }}
+      </span>
+  
+      <label :for=indexUuid>
+        Runs On:
+      </label>
+      <span :id=indexUuid>
+        {{ props.data.type }}
+      </span>
+    </div>
+
+    <div class="command-text">
+      <label :for="commandTextUuid">
+        Commands
+      </label>
+      <textarea :id="commandTextUuid" v-model="commandsRef" />
+    </div>
   </div>
 </template>
 
 <style scoped>
+.command-node-container {
+  background-color: rgb(119, 194, 89);
+  display: flex;
+  align-content: center;
+  flex-direction: column;
+  padding: 2ch;
+}
 
+.command-node-header {
+  display: grid;
+  grid-template-columns: fit-content(100px) 1fr;
+  row-gap: 10px;  /* vertical spacing between rows */
+  column-gap: 10px;
+  align-items: center;
+}
+
+.command-text {
+  display: flex;
+  column-gap: 10px;
+  align-items: center;
+  flex-direction: column;
+}
 </style>
