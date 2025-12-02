@@ -290,11 +290,11 @@ const viewportDrag = useViewportPan()
       </template>
   
       <template #node-button-slot="props">
-        <ButtonSlotNode v-bind="props" @edit-button="handleButtonEdit" />
+        <ButtonSlotNode v-bind="props" @edit-button="handleButtonEdit" @select-node="handleSelectNode" />
       </template>
   
       <template #node-command-slot="props">
-        <SceneCommandNode v-bind="props" @edit-command="handleEditCommand" />
+        <SceneCommandNode v-bind="props" @edit-command="handleEditCommand" @select-node="handleSelectNode" />
       </template>
   
     </VueFlow>
