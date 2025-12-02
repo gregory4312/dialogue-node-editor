@@ -335,6 +335,75 @@ export class LogicalScene {
   }
 
   /**
+   * Deletes the button in the targeted slot index.
+   * @param slotIndex Target slot, with the first slot being index 0.
+   * @returns Returns an array of flow-on data changes.
+   */
+  public deleteSlot(slotIndex: number): ButtonSlotDataChange[] {
+    const slotToDelete = this.buttonMap.get(slotIndex)
+    if (!slotToDelete) {
+      return []
+    }
+    const deletedSlotData: ButtonSlotDataChange = {
+      change: "deleted",
+      id: slotToDelete.id,
+      index: slotIndex,
+      kind: "button"
+    }
+    this.buttonMap.delete(slotIndex)
+    this.scene.buttons.splice(slotIndex, 1)
+
+    const deletionData: ButtonSlotDataChange[] = []
+    deletionData.push(deletedSlotData)
+    // now reorder the map
+    const updatedMap = new Map<number, VisualSlot>()
+    for (const [key, value] of this.buttonMap.entries()) {
+      // reduce by one if above slotIndex, or keep the same
+      let newSlotIndex: number
+      if (key > slotIndex) {
+        // these are modifications
+        newSlotIndex = key - 1
+        const change: ButtonSlotDataChange = {
+          change: "modified",
+          id: value.id,
+          index: newSlotIndex,
+          kind: "button"
+        }
+        // record these changes
+        deletionData.push(change)
+      } else {
+        newSlotIndex = key
+      }
+
+      updatedMap.set(newSlotIndex, value)
+    }
+    this.buttonMap = updatedMap
+    return deletionData
+  }
+
+  /**
+   * Deletes the command in the targeted slot.
+   * @param commandSlot Target command slot.
+   * @returns Returns the node id of the deleted command if it existed.
+   */
+  public deleteCommand(commandSlot: SceneCommandSlot): string | null {
+    const commandToDelete = this.commandMap.get(commandSlot)
+    if (!commandToDelete) {
+      return null
+    }
+    this.commandMap.delete(commandSlot)
+    
+    if (commandSlot === "close") {
+      this.scene.closeCommands = []
+    } else if (commandSlot === "open") {
+      this.scene.openCommands = []
+    } else {
+      throw new Error(`LogicalScene.ts: deleteCommand invalid commandSlot ${commandSlot}`)
+    }
+    return commandToDelete.id
+  }
+
+  /**
    * Updates the button in the specified slot.
    * @param slotIndex The button slot index.
    * @param newButton The updated button.
