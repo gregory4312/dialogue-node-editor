@@ -363,7 +363,8 @@ export class LogicalScene {
     if (currentSlots >= SCENE_MAX_BUTTONS) {
       throw new Error(`Cannot add more than maximum number of ${SCENE_MAX_BUTTONS} slots.`)
     }
-    const newTargetIndex = currentSlots + 1
+    // this is the same since they start at zero
+    const newTargetIndex = currentSlots
     const newSlot: VisualSlot = {
       id: uuidv4(),
       index: newTargetIndex,
