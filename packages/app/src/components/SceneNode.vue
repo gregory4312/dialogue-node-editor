@@ -78,18 +78,18 @@ const sceneTextUuid = `scene-text-${localUuid}`
       <label :for=npcUuid>
         NPC Name:
       </label>
-      <input :id=npcUuid v-model="npcNameRef" />
+      <input :id=npcUuid v-model="npcNameRef" @mousedown.stop />
 
       <span :id="openUuid">
         Open Command:
       </span>
       <div v-if="props.data.openCommandNode">
-        <button class="command-button" :aria-labelledby="openUuid" @click="selectOpenCommand">
+        <button class="command-button" :aria-labelledby="openUuid" @click="selectOpenCommand" @mousedown.stop>
           <ArrowUpLeft />
         </button>
       </div>
       <div v-else>
-        <button class="command-button" :aria-labelledby="openUuid" @click="addSceneSlot('open')">
+        <button class="command-button" :aria-labelledby="openUuid" @click="addSceneSlot('open')" @mousedown.stop>
           <Plus />
         </button>
       </div>
@@ -98,12 +98,12 @@ const sceneTextUuid = `scene-text-${localUuid}`
         Close Command:
       </span>
       <div v-if="props.data.closeCommandNode">
-        <button class="command-button" :aria-labelledby="closeUuid" @click="selectCloseCommand">
+        <button class="command-button" :aria-labelledby="closeUuid" @click="selectCloseCommand" @mousedown.stop>
           <ArrowUpLeft />
         </button>
       </div>
       <div v-else>
-        <button class="command-button" :aria-labelledby="closeUuid" @click="addSceneSlot('close')">
+        <button class="command-button" :aria-labelledby="closeUuid" @click="addSceneSlot('close')" @mousedown.stop>
           <Plus />
         </button>
       </div>
@@ -116,13 +116,13 @@ const sceneTextUuid = `scene-text-${localUuid}`
       </label>
       <div :id="buttonsUuid" class="button-grid">
         <template v-for="(slot, index) in SCENE_MAX_BUTTONS" :key="index">
-            <button v-if="props.data.buttonNodes[index]" @click="selectButtonSlot(index)">
+            <button v-if="props.data.buttonNodes[index]" @click="selectButtonSlot(index)" @mousedown.stop>
               {{ slot }}
             </button>
-            <button v-else-if="index === props.data.buttonNodes.length" @click="addSceneSlot(slot.toString() as SceneButtonSlot)">
+            <button v-else-if="index === props.data.buttonNodes.length" @click="addSceneSlot(slot.toString() as SceneButtonSlot)" @mousedown.stop>
               <Plus />
             </button>
-            <button disabled class="disabled-button" v-else>
+            <button v-else disabled class="disabled-button" @mousedown.stop>
               <X />
             </button>
         </template>
@@ -133,7 +133,7 @@ const sceneTextUuid = `scene-text-${localUuid}`
       <label :for=sceneTextUuid>
         Scene Text
       </label>
-      <textarea :id=sceneTextUuid v-model="sceneTextRef" />
+      <textarea :id=sceneTextUuid v-model="sceneTextRef" @mousedown.stop />
     </div>
   </div>
 </template>

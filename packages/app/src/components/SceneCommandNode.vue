@@ -36,7 +36,7 @@ const commandTextUuid = `button-commands-${props.data.id}`
   <div class="command-node-container" @mousedown="drag.onMouseDown">
     <div class="command-node-header">
       <div>
-        <button @click="selectParent">
+        <button @click="selectParent" @mousedown.stop>
           <ArrowUpLeft />
         </button>
         <label :for=sceneUuid>
@@ -59,7 +59,7 @@ const commandTextUuid = `button-commands-${props.data.id}`
       <label :for="commandTextUuid">
         Commands
       </label>
-      <textarea :id="commandTextUuid" v-model="commandsRef" />
+      <textarea :id="commandTextUuid" v-model="commandsRef" @mousedown.stop />
     </div>
   </div>
 </template>
