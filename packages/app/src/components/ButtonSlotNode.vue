@@ -3,7 +3,7 @@ import { useNodeDrag } from '@/composables/manualDrag';
 import type { VisualSlot } from '@/types';
 import { type NodeProps } from '@vue-flow/core'
 import type { Button } from '@workspace/common';
-import { ArrowUpLeft } from 'lucide-vue-next';
+import { ArrowUpLeft, Trash2 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<NodeProps<VisualSlot>>()
@@ -50,6 +50,10 @@ function update() {
     )
 }
 
+function deleteSlotNode() {
+  emit("deleteSlotNode", props.data.parentSceneId, props.data.index, props.data.id)
+}
+
 // select parent
 function selectParent() {
   emit("selectNode", props.data.parentSceneId)
@@ -58,6 +62,7 @@ function selectParent() {
 const emit = defineEmits<{
   (event: 'editButton', parentSceneId: string, nodeId: string, buttonIndex: number, button: Button): void
   (event: "selectNode", nodeId: string): void
+  (event: "deleteSlotNode", parentSceneId: string, index: number, nodeId: string): void
 }>()
 
 // uuids
@@ -73,6 +78,9 @@ const commandTextUuid = `button-commands-${props.data.id}`
       <div>
         <button @click="selectParent" @mousedown.stop>
           <ArrowUpLeft />
+        </button>
+        <button @click="deleteSlotNode" @mousedown.stop>
+          <Trash2 />
         </button>
         <label :for=sceneUuid>
           Parent Scene:

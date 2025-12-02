@@ -209,6 +209,25 @@ function handleAddSceneSlot(sceneId: string, slot: SceneFunctionSlot) {
   updateNodeData<VisualScene>(scene.sceneId, { ...scene.getVisualScene() })
 }
 
+function handleDeleteSlotNode(parentSceneId: string, index: number, nodeId: string) {
+  const scene = getScene(parentSceneId)
+  if (!scene) return
+  removeNodes(nodeId)
+  const deletionInfo = scene.deleteSlot(index)
+  deletionInfo.forEach(change => {
+    // don't delete the node, we did that already
+    if (change.change === "deleted") return
+
+    // only change is the indexes
+    updateNodeData<VisualSlot>(change.id, { index: change.index })
+  })
+
+  // update the scene node's data
+  updateNodeData<VisualScene>(scene.sceneId, { ...scene.getVisualScene() })
+  updateScene(scene)
+}
+
+
 // viewport custom drag handler
 const viewportDrag = useViewportPan()
 
@@ -230,7 +249,7 @@ const viewportDrag = useViewportPan()
       </template>
   
       <template #node-button-slot="props">
-        <ButtonSlotNode v-bind="props" @edit-button="handleButtonEdit" @select-node="handleSelectNode" />
+        <ButtonSlotNode v-bind="props" @edit-button="handleButtonEdit" @select-node="handleSelectNode" @delete-slot-node="handleDeleteSlotNode" />
       </template>
   
       <template #node-command-slot="props">
