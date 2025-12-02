@@ -40,6 +40,10 @@ export interface ButtonSlotDataChange {
    * The type of change.
    */
   readonly change: DataChangeCategory
+  /**
+   * Whether the slot is now the highest currently enabled index.
+   */
+  readonly highestIndex: boolean | null
 }
 
 /**
@@ -142,4 +146,8 @@ export interface VisualSlot {
    * The current button in this slot.
    */
   button: Button
+  /**
+   * Whether the slot is the highest currently enabled index.
+   */
+  highestIndex: boolean
 }

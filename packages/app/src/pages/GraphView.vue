@@ -201,8 +201,12 @@ function handleAddSceneSlot(sceneId: string, slot: SceneFunctionSlot) {
   } else {
     const emptyButton: Button = { commands: [], displayName: "" }
     const sceneButtonSlot = scene.addSlot(emptyButton)
-    const slotNode = toSlotNode(sceneButtonSlot)
+    const slotNode = toSlotNode(sceneButtonSlot.newSlot)
     addNodes(slotNode)
+    const highestIndexChange = sceneButtonSlot.highestIndexChange
+    if (highestIndexChange) {
+      updateNodeData<VisualSlot>(highestIndexChange.id, { highestIndex: false })
+    }
   }
   // send the update
   updateScene(scene)
@@ -219,7 +223,8 @@ function handleDeleteSlotNode(parentSceneId: string, index: number, nodeId: stri
     if (change.change === "deleted") return
 
     // only change is the indexes
-    updateNodeData<VisualSlot>(change.id, { index: change.index })
+    // `as boolean` works as `null` is only for `deleted`
+    updateNodeData<VisualSlot>(change.id, { index: change.index, highestIndex: change.highestIndex as boolean })
   })
 
   // update the scene node's data

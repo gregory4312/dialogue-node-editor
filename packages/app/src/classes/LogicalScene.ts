@@ -53,13 +53,17 @@ export class LogicalScene {
     // making ids for the buttons
     const buttonMap = new Map<number, VisualSlot>()
     const buttons = scene.buttons
+    // buttons know if they are the highest
+    const lastButtonIndex = buttons.length - 1
     buttons.forEach((button, index) => {
+      const isLastIndex = (lastButtonIndex === index)
       const uuid = uuidv4()
       const buttonSlot: VisualSlot = {
         index,
         button,
         parentSceneId: scene.sceneId,
-        id: uuid
+        id: uuid,
+        highestIndex: isLastIndex
       }
       buttonMap.set(index, buttonSlot)
     })
@@ -105,11 +109,13 @@ export class LogicalScene {
     if (rawOldScene.sceneId !== updatedScene.sceneId) {
       throw new Error(`Cannot update scene: IDs do not match (${rawOldScene.sceneId} !== ${updatedScene.sceneId})`);
     }
+    const lastButtonIndex = updatedScene.buttons.length - 1
 
     /** This is the FULL slot map, not just changed slots. Does not include deleted slots. */
     const updatedButtonMap = new Map<number, VisualSlot>()
     const updatedButtons = new Map<number, ButtonSlotDataChange>()
     for (let index = 0; index < SCENE_MAX_BUTTONS; index++) {
+      const isLastIndex = (index === lastButtonIndex)
       // check if the buttons have changed
       const oldButton = rawOldScene.buttons[index]
       const newButton = updatedScene.buttons[index]
@@ -120,7 +126,8 @@ export class LogicalScene {
           id: buttonUuid, // won't be the correct uuid if this is actually a creation. shouldn't be a problem though
           index,
           kind: "button",
-          change: "modified"
+          change: "modified",
+          highestIndex: isLastIndex
         }
         updatedButtons.set(index, buttonModifiedChange)
       }
@@ -131,7 +138,8 @@ export class LogicalScene {
           id: buttonUuid,
           index,
           kind: "button",
-          change: "created"
+          change: "created",
+          highestIndex: isLastIndex
         }
         updatedButtons.set(index, buttonCreatedChange)
       }
@@ -143,7 +151,8 @@ export class LogicalScene {
             id: buttonUuid,
             index,
             kind: "button",
-            change: "deleted"
+            change: "deleted",
+            highestIndex: isLastIndex
           }
           updatedButtons.set(index, buttonDeletedChange)
         }
@@ -156,7 +165,8 @@ export class LogicalScene {
         id: buttonUuid,
         index,
         parentSceneId: updatedScene.sceneId,
-        button: newButton
+        button: newButton,
+        highestIndex: isLastIndex
       }
       updatedButtonMap.set(index, newSlot)
     }
@@ -348,10 +358,13 @@ export class LogicalScene {
       change: "deleted",
       id: slotToDelete.id,
       index: slotIndex,
-      kind: "button"
+      kind: "button",
+      highestIndex: null
     }
     this.buttonMap.delete(slotIndex)
     this.scene.buttons.splice(slotIndex, 1)
+    // MUST COME AFTER the previous line
+    const lastButtonIndex = this.scene.buttons.length - 1
 
     const deletionData: ButtonSlotDataChange[] = []
     deletionData.push(deletedSlotData)
@@ -363,16 +376,30 @@ export class LogicalScene {
       if (key > slotIndex) {
         // these are modifications
         newSlotIndex = key - 1
+        const isLastIndex = (newSlotIndex === lastButtonIndex)
         const change: ButtonSlotDataChange = {
           change: "modified",
           id: value.id,
           index: newSlotIndex,
-          kind: "button"
+          kind: "button",
+          highestIndex: isLastIndex
         }
         // record these changes
         deletionData.push(change)
       } else {
         newSlotIndex = key
+        // if this index is now the last one, then that's also a change
+        const isLastIndex = (newSlotIndex === lastButtonIndex)
+        if (isLastIndex) {
+          const lastChange: ButtonSlotDataChange = {
+            change: "modified",
+            id: value.id,
+            index: newSlotIndex,
+            kind: "button",
+            highestIndex: isLastIndex
+          }
+          deletionData.push(lastChange)
+        }
       }
 
       updatedMap.set(newSlotIndex, value)
@@ -427,22 +454,39 @@ export class LogicalScene {
    * @param newButton The new button.
    * @returns The newly created slot.
    */
-  public addSlot(newButton: Button): VisualSlot {
+  public addSlot(newButton: Button): { newSlot: VisualSlot, highestIndexChange?: ButtonSlotDataChange } {
     const currentSlots = this.scene.buttons.length
     if (currentSlots >= SCENE_MAX_BUTTONS) {
       throw new Error(`Cannot add more than maximum number of ${SCENE_MAX_BUTTONS} slots.`)
     }
+
     // this is the same since they start at zero
     const newTargetIndex = currentSlots
+    const previousHighestIndex = newTargetIndex - 1
     const newSlot: VisualSlot = {
       id: uuidv4(),
       index: newTargetIndex,
       parentSceneId: this.sceneId,
-      button: newButton
+      button: newButton,
+      highestIndex: true
     }
+    const returnData = { newSlot, highestIndexChange: undefined as ButtonSlotDataChange | undefined }
+
     this.buttonMap.set(newTargetIndex, newSlot)
+    const secondHighestSlot = this.buttonMap.get(previousHighestIndex)
+    if (secondHighestSlot) {
+      secondHighestSlot.highestIndex = false // IN THE LOGICAL SCENE TOO!
+      const highestChange: ButtonSlotDataChange = {
+        change: "modified",
+        highestIndex: false,
+        id: secondHighestSlot.id,
+        index: secondHighestSlot.index,
+        kind: "button"
+      }
+      returnData.highestIndexChange = highestChange
+    }
     this.scene.buttons.push(newButton)
-    return newSlot
+    return returnData
   }
 
   /**
@@ -467,6 +511,10 @@ export class LogicalScene {
     // swap the indices themselves
     firstSlot.index = secondIndex
     secondSlot.index = firstIndex
+    // swap highest rating too
+    const firstSlotHighest = firstSlot.highestIndex
+    firstSlot.highestIndex = secondSlot.highestIndex
+    secondSlot.highestIndex = firstSlotHighest
 
     // swap in map
     this.buttonMap.set(firstIndex, secondSlot)
