@@ -21,7 +21,7 @@
   },
   "main": "./dist/extension.cjs",
   "activationEvents": [
-    "*"
+    "onLanguage:json"
   ],
   "contributes": {
     "commands": [
@@ -73,8 +73,7 @@
         "displayName": "%bedrockDialogueEditor.nodeEditor.displayName%",
         "selector": [
           {
-            "filenamePattern": "*.json",
-            "language": "json"
+            "filenamePattern": "*.json"
           }
         ]
       }
