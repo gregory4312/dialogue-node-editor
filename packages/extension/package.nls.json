@@ -1,23 +1,23 @@
 {
   "bedrockDialogueEditor.name": "Bedrock Dialogue Editor",
-  "bedrockDialogueEditor.displayName": "Bedrock Visual Dialogue Editor",
+  "bedrockDialogueEditor.displayName": "Bedrock Dialogue Node Editor",
 
 
-  "bedrockDialogueEditor.openGraphEditor": "Open Dialogue Edior",
+  "bedrockDialogueEditor.openNodeEditor": "Open Dialogue Edior",
   "bedrockDialogueEditor.category": "Dialogue",
 
 
   "bedrockDialogueEditor.autoOpen.title": "Auto Open",
-  "bedrockDialogueEditor.autoOpen.desc": "Automatically open dialogue files in the visual editor.",
+  "bedrockDialogueEditor.autoOpen.desc": "Automatically open dialogue files in the node editor.",
 
   "bedrockDialogueEditor.switchFocusOnOpen.title": "Switch Focus On Open",
   "bedrockDialogueEditor.switchFocusOnOpen.desc": "Switch focus to the dialogue editor tab when opening.\n\nThis only has an effect if `editorOpenLocation` is set to `beside`.",
   
   "bedrockDialogueEditor.editorOpenLocation.title": "Editor Open Location",
-  "bedrockDialogueEditor.editorOpenLocation.desc": "The column that the dialogue editor should open in when called from `openGraphEditor`.",
+  "bedrockDialogueEditor.editorOpenLocation.desc": "The column that the dialogue editor should open in when called from `openNodeEditor`.",
   "bedrockDialogueEditor.editorOpenLocation.active.desc": "The dialogue editor opens in the *active* view column.",
   "bedrockDialogueEditor.editorOpenLocation.beside.desc": "The dialogue editor opens in the view column *next* to the active one.",
 
 
-  "bedrockDialogueEditor.graphEditor.displayName": "Dialogue Graph Editor"
+  "bedrockDialogueEditor.nodeEditor.displayName": "Dialogue Node Editor"
 }

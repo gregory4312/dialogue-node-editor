@@ -7,7 +7,7 @@ import { DialogueEditor } from "./DialogueEditor";
 
 export class Command {
 
-  private static openDialogueEditorCommand = "bedrockDialogueEditor.openGraphEditor"
+  private static openDialogueEditorCommand = "bedrockDialogueEditor.openNodeEditor"
 
   public static registerOpenDialogueEditor() {
 

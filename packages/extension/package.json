@@ -1,5 +1,5 @@
 {
-  "name": "bedrock-visual-dialogue-editor",
+  "name": "bedrock-dialogue-node-editor",
   "version": "0.0.1",
   "private": true,
   "author": "Aevarkan",
@@ -10,11 +10,11 @@
     "copy-media": "node scripts/copy-app-media-files.cjs",
     "compile": "tsdown",
     "build": "pnpm run copy-media && pnpm run compile",
-    "package": "vsce package -o bedrock-visual-dialogue-editor.vsix"
+    "package": "vsce package -o bedrock-dialogue-node-editor.vsix"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Aevarkan/dialogue-graph"
+    "url": "https://github.com/Aevarkan/dialogue-node-editor"
   },
   "engines": {
     "vscode": "^1.105.0"
@@ -26,15 +26,15 @@
   "contributes": {
     "commands": [
       {
-        "command": "bedrockDialogueEditor.openGraphEditor",
-        "title": "%bedrockDialogueEditor.openGraphEditor%",
+        "command": "bedrockDialogueEditor.openNodeEditor",
+        "title": "%bedrockDialogueEditor.openNodeEditor%",
         "category": "%bedrockDialogueEditor.category%"
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "bedrockDialogueEditor.openGraphEditor",
+          "command": "bedrockDialogueEditor.openNodeEditor",
           "when": "editorLangId == json"
         }
       ]
@@ -69,8 +69,8 @@
     },
     "customEditors": [
       {
-        "viewType": "bedrockDialogueEditor.graphEditor",
-        "displayName": "%bedrockDialogueEditor.graphEditor.displayName%",
+        "viewType": "bedrockDialogueEditor.nodeEditor",
+        "displayName": "%bedrockDialogueEditor.nodeEditor.displayName%",
         "selector": [
           {
             "filenamePattern": "*.json",
