@@ -12,6 +12,7 @@ import { toCommandNode, toSceneNode, toSlotNode } from '@/helpers/nodes'
 import type { DataChangeCategory, SceneCommandSlot, SceneFunctionSlot, VisualScene, VisualSceneCommand, VisualSlot } from '@/types'
 import { useViewportPan } from '@/composables/viewportPanDrag'
 import { useLayout } from '@/composables/useLayout'
+import { makeChildEdge } from '@/helpers/edges'
 
 const { createScene, deleteScene, onSceneCreate, onSceneDelete, onSceneUpdate, updateScene, getScene } = useDialogueData()
 const { inWebview, postMessage } = useVsCode()
@@ -60,6 +61,8 @@ function handleCommandSlotUpdate(update: Exclude<DataChangeCategory, "deleted">,
   switch (update) {
     case 'created':
       addNodes(toCommandNode(command))
+      const edge = makeChildEdge(command.parentSceneId, command.id)
+      addEdges(edge)
       break
     case 'modified':
       updateNodeData(command.id, command)
@@ -71,6 +74,8 @@ function handleButtonSlotUpdate(update: Exclude<DataChangeCategory, "deleted">, 
     switch (update) {
     case 'created':
       addNodes(toSlotNode(slot))
+      const edge = makeChildEdge(slot.parentSceneId, slot.id)
+      addEdges(edge)
       break
     case 'modified':
       updateNodeData(slot.id, slot)
@@ -87,11 +92,15 @@ function addNewScene(newScene: LogicalScene) {
     const slotNodePosition = getNodePosition(newScene.sceneId, { nodeType: "button", slot: slot.index})
     const slotNode = toSlotNode(slot, slotNodePosition)
     addNodes(slotNode)
+    const slotEdge = makeChildEdge(newScene.sceneId, slot.id)
+    addEdges(slotEdge)
   })
   newScene.getCommands().forEach(cmd => {
     const commandNodePosition = getNodePosition(newScene.sceneId, { nodeType: "command", slot: cmd.type})
     const commandNode = toCommandNode(cmd, commandNodePosition)
     addNodes(commandNode)
+    const commandEdge = makeChildEdge(newScene.sceneId, cmd.id)
+    addEdges(commandEdge)
   })
 }
 
@@ -208,12 +217,14 @@ function handleAddSceneSlot(sceneId: string, slot: SceneFunctionSlot) {
     const sceneCommand = scene.setCommand(slot, [])
     const commandNode = toCommandNode(sceneCommand)
     addNodes(commandNode)
+    addEdges(makeChildEdge(sceneId, sceneCommand.id))
   // button slot
   } else {
     const emptyButton: Button = { commands: [], displayName: "" }
     const sceneButtonSlot = scene.addSlot(emptyButton)
     const slotNode = toSlotNode(sceneButtonSlot.newSlot)
     addNodes(slotNode)
+    addEdges(makeChildEdge(sceneId, sceneButtonSlot.newSlot.id))
     const highestIndexChange = sceneButtonSlot.highestIndexChange
     if (highestIndexChange) {
       updateNodeData<VisualSlot>(highestIndexChange.id, { highestIndex: false })
