@@ -15,7 +15,7 @@ import { useLayout } from '@/composables/useLayout'
 
 const { createScene, deleteScene, onSceneCreate, onSceneDelete, onSceneUpdate, updateScene, getScene } = useDialogueData()
 const { inWebview, postMessage } = useVsCode()
-const { getPosition, getViewportState, setViewportState } = useLayout()
+const { getPosition, getViewportState, setViewportState, setPosition } = useLayout()
 
 const { onInit, onConnect, addEdges, addNodes, updateNodeData, removeNodes, findNode, updateNode, viewport, setCenter, onViewportChangeEnd } = useVueFlow()
 
@@ -262,6 +262,9 @@ function handleIndexSwap(parentSceneId: string, currentIndex: number, targetInde
   console.log(newSlots)
   newSlots.forEach(slot => {
     updateNodeData<VisualSlot>(slot.id, { ...slot })
+    // assertion is valid, the node must exist as the id does too
+    const nodePosition = findNode(slot.id)!.computedPosition
+    setPosition(parentSceneId, { x: nodePosition.x, y: nodePosition.y }, { nodeType: "button", slot: slot.index })
   })
 
   // update the scene as well
