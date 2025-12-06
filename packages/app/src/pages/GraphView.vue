@@ -15,9 +15,9 @@ import { useLayout } from '@/composables/useLayout'
 
 const { createScene, deleteScene, onSceneCreate, onSceneDelete, onSceneUpdate, updateScene, getScene } = useDialogueData()
 const { inWebview, postMessage } = useVsCode()
-const { getPosition } = useLayout()
+const { getPosition, getViewportState, setViewportState } = useLayout()
 
-const { onInit, onConnect, addEdges, addNodes, updateNodeData, removeNodes, findNode, updateNode, viewport, setCenter } = useVueFlow()
+const { onInit, onConnect, addEdges, addNodes, updateNodeData, removeNodes, findNode, updateNode, viewport, setCenter, onViewportChangeEnd } = useVueFlow()
 
 onSceneCreate((_sceneId, scene) => {
   addNewScene(scene)
@@ -106,6 +106,9 @@ onSceneDelete((sceneId, children) => {
 onInit((vueFlowInstance) => {
   // instance is the same as the return of `useVueFlow`
   vueFlowInstance.fitView()
+
+  // saved position
+  vueFlowInstance.setViewport(getViewportState())
   console.log("In webview: ", inWebview())
   if (inWebview()) {
     const readyMessage: ReadyMessage = {
@@ -125,6 +128,9 @@ onConnect((connection) => {
   addEdges(connection)
 })
 
+onViewportChangeEnd((viewportTransform) => {
+  setViewportState(viewportTransform)
+})
 
 //////////////////
 // END TEMPLATE //

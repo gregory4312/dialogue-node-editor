@@ -1,12 +1,13 @@
 // Copyright (c) 2025 Aevarkan
 // Licensed under the GPLv3 license
 
-import type { XYPosition } from "@vue-flow/core";
+import type { ViewportTransform, XYPosition } from "@vue-flow/core";
 import { useVsCode } from "./vscodeMessages";
 import type { NodeStateOptions } from "@/types";
 
 interface LayoutState {
-  state: SceneState[]
+  state: SceneState[],
+  viewPort: ViewportTransform
 }
 
 interface SceneState {
@@ -22,6 +23,7 @@ export function useLayout() {
   const { setState, getState } = useVsCode()
   
   const layoutMap = new Map<string, SceneState>()
+  let currentViewport: ViewportTransform = { x: 0, y: 0, zoom: 1 }
 
   // initialised from saved state
   const savedState = getState() as LayoutState | undefined
@@ -29,12 +31,14 @@ export function useLayout() {
     for (const savedScene of savedState.state) {
       layoutMap.set(savedScene.sceneId, savedScene)
     }
+    currentViewport = savedState.viewPort
   }
 
   function saveState() {
     const stateArray = Array.from(layoutMap.values())
     const stateObject: LayoutState = {
-      state: stateArray
+      state: stateArray,
+      viewPort: currentViewport
     }
     setState(stateObject)
   }
@@ -99,6 +103,15 @@ export function useLayout() {
     }
   }
 
-  return { setPosition, getPosition }
+  function setViewportState(transform: ViewportTransform) {
+    currentViewport = transform
+    saveState()
+  }
+
+  function getViewportState() {
+    return currentViewport
+  }
+
+  return { setPosition, getPosition, setViewportState, getViewportState }
 
 }
