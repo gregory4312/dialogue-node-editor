@@ -34,8 +34,8 @@ export function useViewportPan() {
   function onMouseUp() {
     isPanning.value = false
     // @ts-expect-error hacky work-around that works
-    document.addEventListener.call(window, 'mousemove', onMouseMove)
-    document.addEventListener.call(window, 'mouseup', onMouseUp)
+    document.removeEventListener.call(window, 'mousemove', onMouseMove)
+    document.removeEventListener.call(window, 'mouseup', onMouseUp)
   }
 
   return { onMouseDown }
