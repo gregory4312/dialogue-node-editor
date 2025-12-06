@@ -329,7 +329,7 @@ function handleAddNewSceneButton() {
       <Background pattern-color="#aaa" :gap="16" />
   
       <template #node-scene="props">
-        <SceneNode v-bind="props" @edit-npc-name="handleEditNpcName" @edit-scene-text="handleEditSceneText" @select-node="handleSelectNode" @add-scene-slot="handleAddSceneSlot" />
+        <SceneNode v-bind="props" @edit-npc-name="handleEditNpcName" @edit-scene-text="handleEditSceneText" @select-node="handleSelectNode" @add-scene-slot="handleAddSceneSlot" @delete-scene="deleteScene" />
       </template>
   
       <template #node-button-slot="props">
