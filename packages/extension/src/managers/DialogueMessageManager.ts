@@ -67,6 +67,13 @@ class DialogueMessageManager {
       if (webviewMessage.messageType === "deleteScene") {
         store.deleteScene(StoreUpdateSource.Webview, webviewMessage.sceneId)
       } else if (webviewMessage.messageType === "ready") {
+        messageQueue.setReady(false) // shouldn't be neccessary, but just for safety
+
+        // queue ALL current scenes to be created again
+        const refreshMessages = store.getSceneMessages()
+        for (const refreshMessage of refreshMessages) {
+          messageQueue.enqueueMessage(refreshMessage)
+        }
         messageQueue.setReady(true)
       } else {
         store.upsertScene(StoreUpdateSource.Webview, webviewMessage.sceneData)

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Aevarkan
 // Licensed under the GPLv3 license
 
-import { Scene } from "@workspace/common"
+import { GenericSceneMessage, Scene } from "@workspace/common"
 import deepEqual from "fast-deep-equal"
 import { DialogueStoreDeleteMessage, DialogueStoreGenericMessage, StoreUpdateSource } from "../storeMessages"
 import { Disposable } from "vscode"
@@ -173,6 +173,25 @@ export class DialogueStore {
     }
 
     return orderedScenes
+  }
+
+  /**
+   * Gets all scenes as createScene messages.
+   * 
+   * @remarks
+   * Intended to be used for fully refreshing data.
+   */
+  public getSceneMessages(): GenericSceneMessage[] {
+    const scenes = Array.from(this.dialogueMap.values())
+    const createSceneMessages: GenericSceneMessage[] = scenes.map(scene => {
+      const createMessage: GenericSceneMessage = {
+        messageType: "createScene",
+        sceneData: scene,
+        sceneId: scene.sceneId
+      }
+      return createMessage
+    })
+    return createSceneMessages
   }
 
 }
