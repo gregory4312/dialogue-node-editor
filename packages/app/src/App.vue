@@ -21,7 +21,7 @@ import GraphView from './pages/GraphView.vue';
 
 .page-container {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
 }
 </style>
 
