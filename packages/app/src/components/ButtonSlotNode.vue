@@ -116,11 +116,11 @@ const commandTextUuid = `button-commands-${props.data.id}`
         <button disabled v-if="props.data.highestIndex">
           <Plus />
         </button>
-        <button v-else @click="swapToIndex(props.data.index + 1)">
+        <button v-else @click="swapToIndex(props.data.index + 1)" @mousedown.stop>
           <Plus />
         </button>
         <!-- enabled if not index 0 -->
-        <button v-if="props.data.index !== 0" @click="swapToIndex(props.data.index - 1)">
+        <button v-if="props.data.index !== 0" @click="swapToIndex(props.data.index - 1)" @mousedown.stop>
           <Minus />
         </button>
         <button disabled v-else>
