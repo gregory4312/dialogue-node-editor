@@ -407,22 +407,25 @@ function toggleMiniMap() {
   
     </VueFlow>
 
-    <div class="overlay-wrapper" @mousedown.stop>
+    <div class="overlay-wrapper">
       <!-- New Scene Button -->
-      <input v-model="newSceneName" />
-      <button v-if="canAddNewScene()" @click="handleAddNewSceneButton">
-        <Plus />
-      </button>
-      <button v-else disabled>
-        <Plus />
-      </button>
+      <div id="new-scene-button-wrapper">
+        <button v-if="canAddNewScene()" @click="handleAddNewSceneButton" @mousedown.stop>
+          <Plus />
+        </button>
+        <button v-else disabled @mousedown.stop>
+          <Plus />
+        </button>
+        <input v-model="newSceneName" placeholder="steve_intro_scene" @mousedown.stop />
+      </div>
 
-      <br />
       <!-- MiniMap Button -->
-      <button @click="toggleMiniMap">
-        <MapMinus v-if="showMiniMap" />
-        <MapPlus v-else />
-      </button>
+      <div>
+        <button @click="toggleMiniMap" @mousedown.stop>
+          <MapMinus v-if="showMiniMap" />
+          <MapPlus v-else />
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -439,5 +442,24 @@ function toggleMiniMap() {
   position: absolute;
   top: 4ch;
   left: 4ch;
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
+}
+
+#new-scene-button-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+input::placeholder {
+  user-select: none;
+  pointer-events: none;
+}
+
+button {
+  aspect-ratio: 1 / 1;
+  border-radius: 5px;
 }
 </style>
