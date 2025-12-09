@@ -172,6 +172,10 @@ const sceneTextUuid = `scene-text-${localUuid}`
   align-content: center;
   flex-direction: column;
   padding: 2ch;
+  border-color: var(--vscode-input-border);
+  border-radius: 5px;
+  border-width: 2px;
+  border-style: solid;
 }
 .scene-node-header {
   display: grid;
@@ -197,7 +201,7 @@ const sceneTextUuid = `scene-text-${localUuid}`
 }
 
 button {
-  border-radius: 5%;
+  border-radius: 5px;
 }
 
 .command-button {

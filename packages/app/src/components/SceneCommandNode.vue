@@ -81,6 +81,10 @@ const commandTextUuid = `button-commands-${props.data.id}`
   align-content: center;
   flex-direction: column;
   padding: 2ch;
+  border-color: var(--vscode-input-border);
+  border-radius: 5px;
+  border-width: 2px;
+  border-style: solid;
 }
 
 .command-node-header {
@@ -104,5 +108,9 @@ textarea {
   -ms-overflow-style: none;
   scrollbar-width: none;
   resize: horizontal;
+}
+
+button {
+  border-radius: 5px;
 }
 </style>
