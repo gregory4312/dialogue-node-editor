@@ -18,7 +18,7 @@ export function useNodeDrag(nodeId: string, sceneId: string, nodeInfo: NodeState
   const { setNodePosition } = useLayoutData()
 
   function updateNodeInfo(nodeInfo: NodeStateOptions) {
-    console.log(nodeId, sceneId, nodeInfo)
+    // console.log(nodeId, sceneId, nodeInfo)
     nodeInformation = nodeInfo
   }
 
@@ -48,7 +48,7 @@ export function useNodeDrag(nodeId: string, sceneId: string, nodeInfo: NodeState
       { id: nodeId, position: newPosition, distance: { x: 0, y: 0 }, from: { ...startPosition }, dimensions: { width: 0, height: 0 } }
     ], true, true)
     setNodePosition(sceneId, newPosition, nodeInformation)
-    console.log(sceneId, newPosition, nodeInformation)
+    // console.log(sceneId, newPosition, nodeInformation)
   }
 
   function onMouseUp() {
