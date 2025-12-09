@@ -8,8 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- node colours are configurable via `nodeColors` setting
-- have node editor use VS Code theme colours
+- made node colours configurable via `nodeColors` setting
+- made node editor use VS Code editor theme colours
 
 ## [0.2.0] 2025-12-08
 
@@ -28,7 +28,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [0.1.1] 2025-12-07
 
-No user changes. The extension is now automatically published through a GitHub workflow.
+No user facing changes.
+
+The extension is now automatically published through a GitHub workflow.
 
 ## [0.1.0] 2025-12-07
 
