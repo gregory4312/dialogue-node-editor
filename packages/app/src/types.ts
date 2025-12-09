@@ -141,6 +141,7 @@ export interface VisualSceneCommand {
 }
 
 export interface VisualSlot {
+  readonly type: "buttonSlot"
   /**
    * Uuid of this slot.
    */

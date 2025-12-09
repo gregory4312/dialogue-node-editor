@@ -63,7 +63,8 @@ export class LogicalScene {
         button,
         parentSceneId: scene.sceneId,
         id: uuid,
-        highestIndex: isLastIndex
+        highestIndex: isLastIndex,
+        type: "buttonSlot"
       }
       buttonMap.set(index, buttonSlot)
     })
@@ -166,7 +167,8 @@ export class LogicalScene {
         index,
         parentSceneId: updatedScene.sceneId,
         button: newButton,
-        highestIndex: isLastIndex
+        highestIndex: isLastIndex,
+        type: "buttonSlot"
       }
       updatedButtonMap.set(index, newSlot)
     }
@@ -468,7 +470,8 @@ export class LogicalScene {
       index: newTargetIndex,
       parentSceneId: this.sceneId,
       button: newButton,
-      highestIndex: true
+      highestIndex: true,
+      type: "buttonSlot"
     }
     const returnData = { newSlot, highestIndexChange: undefined as ButtonSlotDataChange | undefined }
 

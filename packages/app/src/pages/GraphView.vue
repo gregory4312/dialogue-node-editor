@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VueFlow, useVueFlow } from '@vue-flow/core'
+import { VueFlow, useVueFlow, type GraphNode } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { useDialogueData } from '@/composables/dialogueData.js'
 import { useVsCode } from '@/composables/vscodeMessages'
@@ -342,6 +342,23 @@ function groupNodesAroundScene(sceneId: string) {
   const positions = arrangeAroundScene(scene, sceneNode.computedPosition)
   for (const [id, pos] of Object.entries(positions)) {
     updateNode(id, { position: pos })
+    
+    // update node positions in state too
+    const node = findNode(id) as GraphNode<VisualSlot> | GraphNode<VisualSceneCommand>
+    switch (node.data.type) {
+      case 'buttonSlot':
+        setNodePosition(sceneId, node.computedPosition, { nodeType: "button", slot: node.data.index })
+        break
+
+      case 'open':
+        setNodePosition(sceneId, node.computedPosition, { nodeType: "command", slot: "open" })
+        break
+
+      case 'close':
+        setNodePosition(sceneId, node.computedPosition, { nodeType: "command", slot: "close" })
+        break
+
+    }
   }
 }
 
