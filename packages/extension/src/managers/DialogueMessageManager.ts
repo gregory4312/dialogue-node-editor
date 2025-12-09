@@ -6,10 +6,11 @@ import { DialogueStore } from "../stores/dialogueStore"
 import { getWebviewContent } from "../helpers/webviewHelper"
 import { fromDialogue, parseRawDialogue, toDialogue } from "../helpers/dialogueParser"
 import { DialogueStoreDeleteMessage, DialogueStoreGenericMessage, StoreUpdateSource } from "../storeMessages"
-import { DeleteSceneMessage, GenericSceneMessage, GenericMessage } from "@workspace/common"
+import { DeleteSceneMessage, GenericSceneMessage, GenericMessage, ConfigMessage } from "@workspace/common"
 import { DialogueDocument, DialogueFileFormatSettings } from "../wrappers/DialogueDocument"
 import { DIALOGUE_FILE_FORMAT_VERSION } from "../constants"
 import { MessageQueue } from "../classes/MessageQueue"
+import { NodeColorsObject } from "../types"
 
 class DialogueMessageManager {
 
@@ -74,8 +75,19 @@ class DialogueMessageManager {
         for (const refreshMessage of refreshMessages) {
           messageQueue.enqueueMessage(refreshMessage)
         }
+
+        // NOTE: This MUST be put into a helper function IF this same piece of code is repeated
+        const colours = workspace.getConfiguration("bedrockDialogueEditor").get<NodeColorsObject>("nodeColors")
+        const configColoursMessage: ConfigMessage = {
+          messageType: "config",
+          sceneNodeColour: colours?.scene ?? "#5f9ea0",
+          buttonSlotNodeColour: colours?.button ?? "#8e6cb4",
+          commandNodeColour: colours?.command ?? "#77c259"
+        }
+        messageQueue.enqueueMessage(configColoursMessage)
+
         messageQueue.setReady(true)
-      } else {
+      } else if (webviewMessage.messageType === "createScene" || webviewMessage.messageType === "updateScene") {
         store.upsertScene(StoreUpdateSource.Webview, webviewMessage.sceneData)
       }
     })

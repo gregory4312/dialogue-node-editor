@@ -4,7 +4,7 @@
 import { Scene } from "./types"
 
 export type SceneMessage = GenericSceneMessage | DeleteSceneMessage
-export type GenericMessage = SceneMessage | ReadyMessage
+export type GenericMessage = SceneMessage | ReadyMessage | ConfigMessage
 
 interface BaseMessage {
   /**
@@ -34,4 +34,20 @@ export interface ReadyMessage {
    */
   isReadyStatus: boolean
   messageType: "ready"
+}
+
+export interface ConfigMessage {
+  messageType: "config",
+  /**
+   * Colour code for scene nodes.
+   */
+  sceneNodeColour: string,
+  /**
+   * Colour code for button slot nodes.
+   */
+  buttonSlotNodeColour: string,
+  /**
+   * Colour code for command nodes.
+   */
+  commandNodeColour: string,
 }

@@ -1,24 +1,25 @@
 // Copyright (c) 2025 Aevarkan
 // Licensed under the GPLv3 license
 
-import { SceneMessage } from "@workspace/common";
+import { ConfigMessage, SceneMessage } from "@workspace/common";
 
 export class MessageQueue {
   /**
    * Message queue, where the key is the scene id.
    */
   private queue = new Map<string, SceneMessage>()
+  private miscQueue = new Map<"config", ConfigMessage>
   /**
    * Whether it's safe to send messages.
    */
   private isReady = false
-  private sendMessage: (message: SceneMessage) => void
+  private sendMessage: (message: SceneMessage | ConfigMessage) => void
 
   /**
    * Creates an unready message queue.
    * @param messageFunction 
    */
-  public constructor(messageFunction: (message: SceneMessage) => void) {
+  public constructor(messageFunction: (message: SceneMessage | ConfigMessage) => void) {
     this.sendMessage = messageFunction
   }
 
@@ -42,9 +43,11 @@ export class MessageQueue {
    * @remarks
    * Overrides any previous messages for the same scene.
    */
-  public enqueueMessage(message: SceneMessage) {
+  public enqueueMessage(message: SceneMessage | ConfigMessage) {
     if (this.isReady) {
       this.sendMessage(message)
+    } else if (message.messageType === "config") {
+      this.miscQueue.set("config", message)
     } else {
       // if the creation message hasn't yet been sent, then an update message is still a creation message
       const existingMessage = this.queue.get(message.sceneId)
@@ -60,6 +63,10 @@ export class MessageQueue {
    * Sends all queued messages.
    */
   private flushMessages() {
+    const configMessage = this.miscQueue.get("config")
+    if (configMessage) {
+      this.sendMessage(configMessage)
+    }
     const messages = this.queue.values()
     for (const message of messages) {
       this.sendMessage(message)
