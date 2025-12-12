@@ -575,6 +575,15 @@ export class LogicalScene {
   }
 
   /**
+   * Gets the ids of button and command nodes.
+   */
+  public getChildNodeIds() {
+    const commandIds = [...this.commandMap.values()].map(cmd => cmd.id)
+    const buttonIds = [...this.buttonMap.values()].map(btn => btn.id)
+    return [...buttonIds, ...commandIds]
+  }
+
+  /**
    * Returns the raw scene data of the logical scene.
    */
   public toScene(): Scene {
