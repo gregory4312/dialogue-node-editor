@@ -32,6 +32,10 @@ export function useSceneDock() {
     listeners.onUndockScene.push(callback)
   }
 
+  function deleteScene(sceneId: string): boolean {
+    return dockedScenes.delete(sceneId)
+  }
+
   function isSceneDocked(sceneId: string) {
     return dockedScenes.has(sceneId)
   }
@@ -41,5 +45,5 @@ export function useSceneDock() {
   }
 
 
-  return { dockScene, undockScene, onDockScene, onUndockScene, isSceneDocked, getDockedSceneIds }
+  return { dockScene, undockScene, onDockScene, onUndockScene, isSceneDocked, getDockedSceneIds, deleteScene }
 }
