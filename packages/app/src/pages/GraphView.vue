@@ -371,6 +371,8 @@ function doubleDouble(sceneId: string) {
   const sceneNode = findNode(sceneId)
   if (!scene || !sceneNode) return
 
+  // update the scene node position because it seems to not save reliably
+  setNodePosition(sceneId, sceneNode.computedPosition, { nodeType: "scene" })
   const positions = arrangeAroundScene(scene, sceneNode.computedPosition)
   for (const [id, pos] of Object.entries(positions)) {
     updateNode(id, { position: pos })
