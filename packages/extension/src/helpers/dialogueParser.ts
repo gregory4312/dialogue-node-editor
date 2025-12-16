@@ -37,9 +37,9 @@ function parseRawDialogue(plainDialogueText: string): DialogueData | null {
 
 // the big stuff!
 
-function fromDialogue(dialogueData: DialogueData): Scene[] {
+function fromDialogue(dialogueData: DialogueData, langData?: LangFileData | null): Scene[] {
   const sceneData = dialogueData["minecraft:npc_dialogue"].scenes
-  const parsedScenes = sceneData.map(scn => fromSceneData(scn))
+  const parsedScenes = sceneData.map(scn => fromSceneData(scn, langData))
   return parsedScenes
 }
 

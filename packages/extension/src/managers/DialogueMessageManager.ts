@@ -11,18 +11,31 @@ import { DialogueDocument, DialogueFileFormatSettings } from "../wrappers/Dialog
 import { DIALOGUE_FILE_FORMAT_VERSION } from "../constants"
 import { MessageQueue } from "../classes/MessageQueue"
 import { useConfigMessage } from "../helpers/configMessage"
+import { loadLangFile, LangFileData } from "../helpers/langFileParser"
 
 const { createCurrentConfigMessage } = useConfigMessage()
 
 class DialogueMessageManager {
 
-  private dialogueStoreMap = new Map<string, DialogueStore>()
+   private dialogueStoreMap = new Map<string, DialogueStore>()
+  private langDataMap = new Map<string, LangFileData | null>()
 
-  public initialiseConnection(context: ExtensionContext, dialogueTextDocument: TextDocument, webviewPanel: WebviewPanel) {
+  public async initialiseConnection(context: ExtensionContext, dialogueTextDocument: TextDocument, webviewPanel: WebviewPanel) {
 
     // a store specifically for this file
     const store = this.getDialogueStore(dialogueTextDocument.uri.toString())
     const messageQueue = new MessageQueue(message => webviewPanel.webview.postMessage(message))
+
+    // Load lang file for rawtext support
+    const langData = await loadLangFile(dialogueTextDocument.uri)
+    this.langDataMap.set(dialogueTextDocument.uri.toString(), langData)
+    
+    if (langData) {
+      console.log('Loaded lang file with', Object.keys(langData).length, 'translations')
+    } else {
+      console.warn('No lang file found for dialogue file:', dialogueTextDocument.uri.fsPath)
+      window.showWarningMessage('No translation file (en_US.lang) found. Rawtext translations will not be resolved.')
+    }
 
     // allow scripts (quite important)
     webviewPanel.webview.options = {
@@ -39,7 +52,7 @@ class DialogueMessageManager {
     /////////////////////
 
     // message sender for changes to our document
-    const textDocumentListener = workspace.onDidChangeTextDocument(event => {
+    const textDocumentListener = workspace.onDidChangeTextDocument(async event => {
       // check if it's our one
       const newDocument = event.document
       const isSelectedDocument = (newDocument.uri.toString() === dialogueTextDocument.uri.toString())
@@ -56,11 +69,13 @@ class DialogueMessageManager {
         window.showErrorMessage("JSON parsing failed!!! From file `DialogueMessageManager`")
         throw new Error("JSON parsing failed!!!")
       }
-      const parsedText = maybeParsedText
 
-      // now we have real scenes
-      const scenes = fromDialogue(parsedText)
-      store.setScenes(StoreUpdateSource.Extension, scenes)
+      // if we make it here, then we parsed it successfully
+      // now convert it to internal format with lang data
+      const documentUri = dialogueTextDocument.uri.toString()
+      const langData = this.langDataMap.get(documentUri)
+      const sceneArray = fromDialogue(maybeParsedText, langData)
+      store.setScenes(StoreUpdateSource.Extension, sceneArray)
     })
 
     // message sender for webview messages
@@ -249,13 +264,11 @@ class DialogueMessageManager {
   /**
    * Gets a dialogue store, creating a new one if it doesn't exist.
    */
-  private getDialogueStore(fileUri: string) {
-    let dialogueStore = this.dialogueStoreMap.get(fileUri)
-    
-    // make a new one if it doesn't exist
+  private getDialogueStore(documentUri: string): DialogueStore {
+    let dialogueStore = this.dialogueStoreMap.get(documentUri)
     if (!dialogueStore) {
       dialogueStore = new DialogueStore()
-      this.dialogueStoreMap.set(fileUri, dialogueStore)
+      this.dialogueStoreMap.set(documentUri, dialogueStore)
     }
     return dialogueStore
   }

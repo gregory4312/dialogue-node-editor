@@ -2,6 +2,21 @@
 // Licensed under the GPLv3 license
 
 /**
+ * Rawtext component for Minecraft Bedrock localization
+ */
+export interface RawtextComponent {
+  translate: string
+  with?: string[]
+}
+
+/**
+ * Rawtext object that can contain translation keys
+ */
+export interface RawtextObject {
+  rawtext: RawtextComponent[]
+}
+
+/**
  * Data representation of dialogue file.
  */
 export interface DialogueData {
@@ -14,8 +29,8 @@ export interface DialogueData {
  */
 export interface SceneData {
   scene_tag: string
-  npc_name?: string
-  text?: string
+  npc_name?: string | RawtextObject
+  text?: string | RawtextObject
   on_open_commands?: string[]
   on_close_commands?: string[]
   buttons?: ButtonData[]
@@ -25,6 +40,6 @@ export interface SceneData {
  * Data representation of button JSON.
  */
 export interface ButtonData {
-  name: string
+  name: string | RawtextObject
   commands: string[]
 }

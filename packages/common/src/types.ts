@@ -71,3 +71,14 @@ export interface MessageSender {
    */
   sendMessage(message: SceneMessage): void
 }
+
+/**
+ * Metadata for tracking rawtext translation keys
+ */
+export interface RawtextMetadata {
+  npcNameKey?: string | null
+  textKey?: string | null
+  textWithValues?: string[] | null
+  nameKey?: string | null
+}
+
